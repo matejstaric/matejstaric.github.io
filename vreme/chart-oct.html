@@ -1,0 +1,258 @@
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <title>ApexCharts Example</title>
+    <!-- Include the ApexCharts library -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link rel="stylesheet" href="https://use.typekit.net/blh4mgm.css">
+    <style>
+        body {
+        font-family: "neue-haas-grotesk-display", sans-serif;
+        background-color: #00ff00;
+        }
+        .label-y {
+          text-shadow: 2px 2px 4px #000000;
+        }
+    </style>
+  </head>
+  <body>
+
+    <!-- <img src="/temp.png" alt=""> -->
+    <!-- Container for the chart -->
+    <div id="chart"></div>
+
+    <script>
+        var series = {
+            monthDataSeries1: {
+              prices: [0, 2.3, 47.9, 71.4, 5.9, 4.4, 0, 0, 36, 0.3, 56.2, 0, 0, 0, 0, 0.6, 1.6, 2.5, 13.4, 0.2, 0, 0, 0, 7.2, 0.2, 0, 0.2, 0, 0, 0],
+              dates: ['2024-10-01', '2024-10-02', '2024-10-03', '2024-10-04', '2024-10-05', '2024-10-06', '2024-10-07', '2024-10-08', '2024-10-09', '2024-10-10', '2024-10-11', '2024-10-12', '2024-10-13', '2024-10-14', '2024-10-15', '2024-10-16', '2024-10-17', '2024-10-18', '2024-10-19', '2024-10-20', '2024-10-21', '2024-10-22', '2024-10-23', '2024-10-24', '2024-10-25', '2024-10-26', '2024-10-27', '2024-10-28', '2024-10-29', '2024-10-30']
+            },
+            monthDataSeries2: {
+              prices: [0, 2.3, 47.9, 71.4, 5.9, 4.4, 0, 0, 36, 0.3, 56.2, 0, 0, 0, 0, 0.6, 1.6, 2.5, 13.4, 0.2, 0, 0, 0, 7.2, 0.2, 0, 0.2, 0, 0, 0],
+              dates: ['2024-10-01', '2024-10-02', '2024-10-03', '2024-10-04', '2024-10-05', '2024-10-06', '2024-10-07', '2024-10-08', '2024-10-09', '2024-10-10', '2024-10-11', '2024-10-12', '2024-10-13', '2024-10-14', '2024-10-15', '2024-10-16', '2024-10-17', '2024-10-18', '2024-10-19', '2024-10-20', '2024-10-21', '2024-10-22', '2024-10-23', '2024-10-24', '2024-10-25', '2024-10-26', '2024-10-27', '2024-10-28', '2024-10-29', '2024-10-30']
+            }
+        };
+      var options = {
+        fontSize: '32px',
+          series: [{
+          data: series.monthDataSeries1.prices,
+          nodeBGColor: '#ffffff',
+        }],
+          chart: {
+            // background: '#fff',
+            animations: {
+                enabled: true,
+                speed: 5000,
+                animateGradually: {
+                    enabled: true,
+                    delay: 5000
+                },
+                dynamicAnimation: {
+                    enabled: true,
+                    speed: 1000
+                }
+            },
+            defaultLocale: 'sl',
+            locales: [{
+              name: 'sl',
+              options: {
+                months: ['Januar', 'Februar', 'Marec', 'April', 'Maj', 'Junij', 'Julij', 'Avgust', 'September', 'Oktober', 'November', 'December'],
+                shortMonths: ['Jan', 'Feb', 'Mar', 'Apr', 'maj', 'Jun', 'Jul', 'Avg', 'Sep', 'Okt', 'Nov', 'Dec'],
+                days: ['Nedelja', 'Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota'],
+                shortDays: ['Ned', 'Pon', 'Tor', 'Sre', 'Čet', 'Pet', 'Sob'],
+                toolbar: {
+                  exportToSVG: 'Prenesi kot SVG',
+                  exportToPNG: 'Prenesi kot PNG',
+                  menu: 'Meni',
+                  selection: 'Izberi',
+                  selectionZoom: 'Povečaj izbiro',
+                  zoomIn: 'Povečaj',
+                  zoomOut: 'Pomanjšaj',
+                  pan: 'Premakni',
+                  reset: 'Ponastavi povečavo'
+                }
+              }
+            }],
+            height: 720,
+            width: 1920,
+            type: 'bar',
+
+          dropShadow: {
+            enabled: true,
+            color: '#000',
+            top: 18,
+            left: 7,
+            blur: 10,
+            opacity: 0.3
+          },
+            id: 'areachart-2',
+            toolbar: {
+                show: false,
+            },
+        },
+        fontSize: '25px',
+        colors: ['#2047fe'],
+        annotations: {
+          xaxis: [{
+            x: new Date('2024-05-03 02:00').getTime(),
+            x2: new Date('2024-05-04 02:00').getTime(),
+            borderColor: '#000',
+            fillColor: '#cccccc',
+            opacity: 0.2,
+          }]
+        },
+        // dataLabels: {
+        //   enabled: false
+        // },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            borderRadius: 3,
+            borderRadiusApplication: 'around',
+            borderRadiusWhenStacked: 'last',
+            columnWidth: '90%',
+            distributed: false,
+            rangeBarOverlap: true,
+            rangeBarGroupRows: false,
+            hideZeroBarsWhenGrouped: false,
+            isDumbbell: false,
+            dumbbellColors: undefined,
+            isFunnel: false,
+            isFunnel3d: true,
+            colors: {
+              ranges: [{
+                from: 0,
+                to: 0,
+                color: undefined
+              }],
+              backgroundBarColors: [],
+              backgroundBarOpacity: 1,
+              backgroundBarRadius: 0,
+            },
+            dataLabels: {
+              position: 'top',
+            },
+          },
+        },
+        dataLabels: {
+          enabled: true,
+          offsetY: -50,
+          style: {
+            fontSize: '32px',
+          },
+          formatter: function (val) {
+            return val > 3 ? val : '';
+          },
+        },
+        fill: {
+          type: 'gradient',
+          gradient: {
+            shade: 'dark',
+            type: "horizontal",
+            shadeIntensity: 0.5,
+            inverseColors: true,
+            opacityFrom: 1,
+            opacityTo: 1,
+            colorStops: [
+              {
+                offset: 0,
+                color: "#265693",
+                opacity: 1
+              },
+              {
+                offset: 20,
+                color: "#4192E2",
+                opacity: 1
+              },
+              {
+                offset: 60,
+                color: "#57ABE6",
+                opacity: 1
+              },
+              {
+                offset: 60,
+                color: "#57ABE6",
+                opacity: 1
+              },
+              {
+                offset: 80,
+                color: "#4192E2",
+                opacity: 1
+              },
+              {
+                offset: 100,
+                color: "#265693",
+                opacity: 1
+              }
+            ]
+          }
+        },
+        grid: {
+          padding: {
+            right: 30,
+            left: 20
+          },
+          borderColor: '#e7e7e766',
+          row: {
+            // colors: ['rgba(255,255,255,0.6)'], // takes an array which will be repeated on columns
+            opacity: 1
+          },
+          
+        },
+        labels: series.monthDataSeries1.dates,
+        xaxis: {
+          type: 'datetime',
+          tickAmount: 30, // 24 hours divided by 4 hours equals 6 ticks
+          labels: {
+            offsetY: 15,
+            show: true,
+            datetimeUTC: false,
+            datetimeFormatter: {
+              hour: 'HH:mm',
+              day: 'd. M.',
+            },
+            formatter: function (value, timestamp) {
+              const date = new Date(timestamp);
+              const day = date.getDate();
+              if (day === 7 || day === 14 || day === 21 || day === 28) {
+                return date.toLocaleDateString('sl-SI', { day: 'numeric', month: 'numeric' });
+              }
+              return '';
+            },
+            style: {
+                colors: '#ffffff',
+                fontSize: '32px',
+                fontWeight: 400,
+                cssClass: 'label-x',
+            },
+          },
+          min: new Date('2024-10-01T02:00:00').getTime(),
+          max: new Date('2024-10-30T02:00:00').getTime()
+        },
+        yaxis: {
+          tickAmount: 5,
+          min: 0,
+          opacity: 0.1,
+          max: 75,
+          labels: {
+            show: true,
+            align: 'left',
+            style: {
+                colors: '#ffffff',
+                fontSize: '32px',
+                fontWeight: 400,
+                cssClass: 'label-y',
+            },
+            formatter: function (value) {
+                  return value + " mm";
+            }
+          },
+        }
+      };
+
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+    </script>
+  </body>
+</html>

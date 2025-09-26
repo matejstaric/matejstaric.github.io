@@ -1,0 +1,14 @@
+site,location,latitude,longitde,temperature,icon,city
+1,Bohinj,46.2942,13.9422,1,,"Bohinjska Češnjica"
+2,Črnomelj,45.56,15.1462,10,,"Dobliče Črnomelj"
+3,Kočevje,45.6458,14.8496,0,,Kočevje
+4,Kranj,46.2477,14.3647,3,,Kranj
+5,Maribor,46.4797,15.6818,5,,"Letališče Edvarda Rusjana Maribor"
+6,Ljubljana,46.2114,14.4784,1,,"Letališče Jožeta Pučnika Ljubljana"
+7,Koper,45.4753,13.616,9,,"Letališče Portorož"
+8,"Murska Sobota",46.6521,16.1913,12,,"Murska Sobota"
+9,"Nova Gorica",45.9556,13.6524,9,,"Nova Gorica"
+10,"Novo mesto",45.8018,15.1773,7,,"Novo mesto"
+11,Postojna,45.7722,14.1973,7,,Postojna
+12,Jesenice,46.4971,13.7129,0,,Rateče
+13,"Slovenj Gradec",46.4896,15.1112,2,,"Šmartno pri Slovenj Gradcu"

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Pin with Flag</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        @keyframes pulse {
+            0% {
+                width: 0px;
+                height: 0px;
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.3);
+            }
+            50% {
+                width: 15px;
+                height: 15px;
+                box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.5);
+            }
+            100% {
+                width: 10px;
+                height: 10px;
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        @keyframes drawLine {
+            0% {
+                height: 0px;
+            }
+            100% {
+                height: 150px;
+            }
+        }
+
+        @keyframes drawFlag {
+            0% {
+                width: 0;
+            }
+            100% {
+                width: 130px;
+                display: block;
+            }
+        }
+
+        body {
+            font-family: 'Helvetica', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: darkolivegreen;
+            position: relative;
+        }
+
+        .pin {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 1s infinite alternate;
+            animation-delay: 500ms;
+        }
+
+        .line {
+            position: absolute;
+            width: 2px;
+            height: 0px;
+            transform: translateY(-100%);
+            background-color: white;
+            transform-origin: top center;
+            animation: drawLine 1s ease-out forwards;
+            animation-delay: 1000ms;
+        }
+
+        .flag {
+            position: absolute;
+            height: 30px;
+            width: 0px;
+            transform-origin: top center;
+            animation: drawFlag 1s ease-out forwards;
+            animation-delay: 2000ms;
+            white-space: nowrap;
+            overflow: hidden;
+            padding: 0px;
+            border-bottom-right-radius: 3px;
+            border-top-right-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-items: center;
+        }
+        .text {
+            font-size: 20px;
+            background-color: white;
+            border-radius: 3px;
+            padding: 10px 20px;
+            line-height: 30px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div id="pin" class="pin" style="left: 300px; top: 300px;"></div>
+    <div id="line" class="line" style="left: 300px; top: 300px;">
+        <div id="flag" class="flag" style="left: 0; top: 0;"><span class="text">Maribor</span></div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,355 @@
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <title>ApexCharts Example</title>
+    <!-- Include the ApexCharts library -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link rel="stylesheet" href="https://use.typekit.net/blh4mgm.css">
+    <style>
+        body {
+        font-family: "neue-haas-grotesk-display", sans-serif;
+        background-color: #000000;
+        }
+        .label-y {
+          text-shadow: 2px 2px 4px #000000;
+        }
+    </style>
+  </head>
+  <body>
+
+    <!-- <img src="/temp.png" alt=""> -->
+    <!-- Container for the chart -->
+    <div id="chart"></div>
+
+    <script>
+        var series = {
+            monthDataSeries1: {
+              
+              prices: [
+                277, 516, 945, 989, 701, 655,
+                628, 708, 923, 1263, 1509, 2323, 2530, 2545,
+                2523, 2564, 2748, 2863, 2868, 2900, 2856, 2730,
+                2491, 2395, 2362, 2256, 2087, 1538, 1513, 1403,
+                1200, 817, 945, 1107],
+              dates: [
+                '2024-11-14 07:00', '2024-11-14 10:00', '2024-11-14 13:00', '2024-11-14 16:00', '2024-11-14 19:00', '2024-11-14 22:00',
+                '2024-11-15 01:00', '2024-11-15 04:00', '2024-11-15 07:00', '2024-11-15 10:00', '2024-11-15 13:00', '2024-11-15 16:00', '2024-11-15 19:00', '2024-11-15 22:00',
+                '2024-11-16 01:00', '2024-11-16 04:00', '2024-11-16 07:00', '2024-11-16 10:00', '2024-11-16 13:00', '2024-11-16 16:00', '2024-11-16 19:00', '2024-11-16 22:00',
+                '2024-11-17 01:00', '2024-11-17 04:00', '2024-11-17 07:00', '2024-11-17 10:00', '2024-11-17 13:00', '2024-11-17 17:00', '2024-11-17 19:00', '2024-11-17 22:00',
+                '2024-11-18 01:00', '2024-11-18 04:00', '2024-11-18 07:00', '2024-11-18 10:00', 
+               ]
+            },
+            // monthDataSeries2: {
+            //   prices: [0, 2.3, 47.9, 71.4, 5.9, 4.4, 0, 0, 36, 0.3, 56.2, 0, 0, 0, 0, 0.6, 1.6, 2.5, 13.4, 0.2, 0, 0, 0, 7.2, 0.2, 0, 0.2, 0, 0, 0],
+            //   dates: ['2024-10-01', '2024-10-02', '2024-10-03', '2024-10-04', '2024-10-05', '2024-10-06', '2024-10-07', '2024-10-08', '2024-10-09', '2024-10-10', '2024-10-11', '2024-10-12', '2024-10-13', '2024-10-14', '2024-10-15', '2024-10-16', '2024-10-17', '2024-10-18', '2024-10-19', '2024-10-20', '2024-10-21', '2024-10-22', '2024-10-23', '2024-10-24', '2024-10-25', '2024-10-26', '2024-10-27', '2024-10-28', '2024-10-29', '2024-10-30']
+            // }
+        };
+      var options = {
+        fontSize: '40px',
+          series: [{
+          data: series.monthDataSeries1.prices,
+          nodeBGColor: '#ffffff',
+        }],
+          chart: {
+            // background: '#fff',
+            animations: {
+                enabled: true,
+                speed: 2000,
+                animateGradually: {
+                    enabled: true,
+                    delay: 5000
+                }
+            },
+            defaultLocale: 'sl',
+            locales: [{
+              name: 'sl',
+              options: {
+                months: ['Januar', 'Februar', 'Marec', 'April', 'Maj', 'Junij', 'Julij', 'Avgust', 'September', 'Oktober', 'november', 'December'],
+                shortMonths: ['Jan', 'Feb', 'Mar', 'Apr', 'maj', 'Jun', 'Jul', 'Avg', 'Sep', 'Okt', 'nov', 'Dec'],
+                days: ['Nedelja', 'Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota'],
+                shortDays: ['Ned', 'Pon', 'Tor', 'Sre', 'Čet', 'Pet', 'Sob'],
+                toolbar: {
+                  exportToSVG: 'Prenesi kot SVG',
+                  exportToPNG: 'Prenesi kot PNG',
+                  menu: 'Meni',
+                  selection: 'Izberi',
+                  selectionZoom: 'Povečaj izbiro',
+                  zoomIn: 'Povečaj',
+                  zoomOut: 'Pomanjšaj',
+                  pan: 'Premakni',
+                  reset: 'Ponastavi povečavo'
+                }
+              }
+            }],
+            height: 720,
+            width: 1800,
+            type: 'line',
+
+          dropShadow: {
+            enabled: true,
+            color: '#000',
+            top: 18,
+            left: 7,
+            blur: 10,
+            opacity: 0.3
+          },
+            id: 'areachart-2',
+            toolbar: {
+                show: false,
+            },
+        },
+        fontSize: '25px',
+        colors: ['#53a8e5'],
+        annotations: {
+          points: [ {
+            x: new Date('2024-11-16 16:00').getTime(),
+            y: 2900,
+            marker: {
+                size: 10,
+                fillColor: '#fff',
+                strokeColor: '#CE2C2C',
+                strokeWidth: 4,
+                radius: 4,
+            },
+            label: {
+                borderColor: '#CE2C2C',
+                offsetY: 25,
+                offsetX: 90,
+                style: {
+                    fontSize: '40px',
+                    color: '#fff',
+                    fontWeight: 600,
+                    background: '#CE2C2C',
+                    padding: {
+                      left: 10,
+                      right: 10,
+                      top: 5,
+                      bottom: 5,
+                    },
+                },
+                text: '2900 m'
+            }
+        },
+        {
+            x: new Date('2024-11-18 04:00').getTime(),
+            y: 817,
+            marker: {
+                size: 10,
+                fillColor: '#fff',
+                strokeColor: '#CE2C2C',
+                strokeWidth: 4,
+                radius: 4,
+            },
+            label: {
+                borderColor: '#CE2C2C',
+                offsetX: -80,
+                style: {
+                    fontSize: '40px',
+                    color: '#fff',
+                    fontWeight: 600,
+                    background: '#CE2C2C',
+                    padding: {
+                      left: 10,
+                      right: 10,
+                      top: 5,
+                      bottom: 5,
+                    },
+                },
+                text: '817 m'
+            }
+        }],
+            xaxis: [{
+                x: new Date('2024-11-14 07:00').getTime(),
+                x2: new Date('2024-11-15 19:00').getTime(),
+                borderColor: '#000',
+                fillColor: '#cccccc',
+                opacity: 0.2,
+            },
+            {
+                x: new Date('2024-11-15 19:00').getTime(),
+                borderColor: '#CE2C2C',
+                borderWidth: 6,
+                strokeDashArray: 0,
+                label: {
+                    borderColor: '#CE2C2C',
+                    borderWidth: 10,
+                    width: '3px',
+                    borderRadius: 2,
+                    offsetX: 10,
+                    style: {
+                        color: '#fff',
+                        background: '#CE2C2C',
+                        fontSize: '32px',
+                    },
+                    text: 'ZDAJ'
+                }
+            }]
+        },
+        // dataLabels: {
+        //   enabled: false
+        // },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            borderRadius: 3,
+            borderRadiusApplication: 'around',
+            borderRadiusWhenStacked: 'last',
+            columnWidth: '90%',
+            distributed: false,
+            rangeBarOverlap: true,
+            rangeBarGroupRows: false,
+            hideZeroBarsWhenGrouped: false,
+            isDumbbell: false,
+            dumbbellColors: undefined,
+            isFunnel: false,
+            isFunnel3d: true,
+            colors: {
+              ranges: [{
+                from: 0,
+                to: 0,
+                color: undefined
+              }],
+              backgroundBarColors: [],
+              backgroundBarOpacity: 1,
+              backgroundBarRadius: 0,
+            },
+            dataLabels: {
+              position: 'top',
+            },
+          },
+        },
+        // dataLabels: {
+        //     enabled: true,
+        //     offsetY: 0,
+        //     style: {
+        //         fontSize: '40px',
+        //     },
+        //     formatter: function (val) {
+        //         return (val > 2890 || (val >= 800 && val <= 850)) ? val : '';
+        //     },
+        // },
+        fill: {
+          type: 'gradient',
+          gradient: {
+            shade: 'dark',
+            type: "horizontal",
+            shadeIntensity: 0.5,
+            inverseColors: true,
+            opacityFrom: 1,
+            opacityTo: 1,
+            colorStops: [
+              {
+                offset: 0,
+                color: "#265693",
+                opacity: 1
+              },
+              {
+                offset: 20,
+                color: "#4192E2",
+                opacity: 1
+              },
+              {
+                offset: 60,
+                color: "#57ABE6",
+                opacity: 1
+              },
+              {
+                offset: 60,
+                color: "#57ABE6",
+                opacity: 1
+              },
+              {
+                offset: 80,
+                color: "#4192E2",
+                opacity: 1
+              },
+              {
+                offset: 100,
+                color: "#265693",
+                opacity: 1
+              }
+            ]
+          }
+        },
+        grid: {
+          padding: {
+            right: 40,
+            left: 40
+          },
+
+          column: {
+                colors: ['#ffffff22', '#ffffff00'],
+                opacity: 0.5
+            },  
+          borderColor: '#ffffff',
+          row: {
+            // colors: ['rgba(255,255,255,0.6)'], // takes an array which will be repeated on columns
+            opacity: 1
+          },
+          
+        },
+        labels: series.monthDataSeries1.dates,
+
+      stroke: {
+        curve: "smooth",
+        width: 10,
+      },
+        xaxis: {
+          type: 'datetime',
+          tickAmount: 30, // 24 hours divided by 4 hours equals 6 ticks
+          labels: {
+            offsetY: 15,
+            show: true,
+            datetimeUTC: false,
+            datetimeFormatter: {
+              hour: 'HH:mm',
+              day: 'd. MMMM',
+            },
+            // datetimeFormatter: {
+                
+            //   formatter: function (value, timestamp) {
+            //             const date = new Date(timestamp);
+            //             const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            //             const formattedDate = date.toLocaleDateString('sl', options);
+            //             const [dayname, rest] = formattedDate.split(', ');
+            //             return `${dayname},<br/>${rest}`;
+            //         }
+            // },
+            style: {
+                colors: '#ffffff',
+                fontSize: '40px',
+                fontWeight: 400,
+                cssClass: 'label-x',
+            },
+          },
+          min: new Date('2024-11-14 07:00').getTime(),
+          max: new Date('2024-11-18 07:00').getTime()
+        },
+        yaxis: {
+          tickAmount: 6,
+          min: 0,
+          opacity: 0.1,
+          max: 3000,
+          labels: {
+            show: true,
+            align: 'left',
+            style: {
+                colors: '#ffffff',
+                fontSize: '40px',
+                fontWeight: 400,
+                cssClass: 'label-y',
+            },
+            formatter: function (value) {
+                  return value + " m";
+            }
+          },
+        }
+      };
+
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+        
+    </script>
+  </body>
+</html>
