@@ -530,6 +530,17 @@ function buildCSV($rows) {
 </head>
 
 <body class="dark:bg-gray-900">
+    <div class="bg-gray-100 border-b border-gray-300 py-6 sticky top-0 z-50">
+        <div class="container mx-auto flex items-baseline gap-8">
+            <h1 class="text-xl font-bold text-gray-800">Vreme</h1> 
+            <nav class="flex items-center gap-4">
+                <a href="/vreme" class="text-lg hover:underline text-gray-500 font-bold">Trenutno</a>
+                <a href="/vreme/fcast.php" class="text-lg underline text-blue-700 font-bold">Napoved</a>
+                <a href="/vreme" class="text-lg hover:underline text-gray-500 font-bold">Obeti</a>
+                <a href="/vreme/arhiv.php" class="text-lg hover:underline text-gray-500 font-bold">Arhiv</a>
+            </nav>
+        </div>
+    </div>
     <div class="container mx-auto grid gap-8 grid-cols-3">
         <table class="col-span-3 min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead>

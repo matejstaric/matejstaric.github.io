@@ -403,8 +403,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <h1 class="text-xl font-bold text-gray-800 ">Vreme</h1> 
             <nav class="flex items-center gap-4">
                 <a href="/vreme" class="text-lg underline text-blue-700 font-bold">Trenutno</a>
-                <a href="/vreme" class="text-lg hover:underline text-gray-500 font-bold">Napoved</a>
+                <a href="/vreme/fcast.php" class="text-lg hover:underline text-gray-500 font-bold">Napoved</a>
                 <a href="/vreme" class="text-lg hover:underline text-gray-500 font-bold">Obeti</a>
+                <a href="/vreme/arhiv.php" class="text-lg hover:underline text-gray-500 font-bold">Arhiv</a>
             </nav>
         </div>
     </div>
