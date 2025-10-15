@@ -1,16 +1,13 @@
-index,town,tempT,longitude,temperature,icon,city
-1,Črnomelj,15,6,19,"Bela krajina region","Bela krajina region"
-2,Bovec,11,5,10,"Bovec region","Bovec region"
-3,Celje,15,6,17,"Celje region","Celje region"
-4,Koper,14,12,18,"Coastal region and Karst","Coastal region and Karst"
-5,Kranj,13,7,14,"Gorenjska region","Gorenjska region"
-6,"Nova Gorica",14,11,17,"Gorica region","Gorica region"
-7,Kočevje,12,7,15,"Kočevje region","Kočevje region"
-8,"Slovenj Gradec",14,6,15,"Koroška region","Koroška region"
-9,Krško,16,7,19,"Krško region","Krško region"
-10,Ljubljana,14,8,15,"Ljubljana region","Ljubljana region"
-11,Maribor,15,7,17,"Maribor region","Maribor region"
-12,"Novo mesto",15,7,17,"Novo mesto region","Novo mesto region"
-13,"Murska Sobota",16,6,18,"Pomurje region","Pomurje region"
-14,Postojna,11,7,15,"Postojna region","Postojna region"
-15,Jesenice,11,3,9,"Upper Sava valley region","Upper Sava valley region"
+site,location,latitude,longitude,temperature,icon,city
+1,"Nova Gorica",45.8958,13.6289,17,cloudy,"Bilje pri Novi Gorici"
+2,Celje,46.2447,15.2525,11,,Celje
+3,Črnomelj,45.5603,15.1508,14,,Črnomelj
+4,Kočevje,45.6453,14.8542,11,,Kočevje
+5,Maribor,46.48,15.6869,12,cloudy,"Letališče Edvarda Rusjana Maribor"
+6,Ljubljana,46.2178,14.4775,12,cloudy,"Letališče Jožeta Pučnika Ljubljana"
+7,Koper,45.4756,13.6206,16,cloudy,"Letališče Portorož"
+8,"Murska Sobota",46.6525,16.1961,12,cloudy,"Murska Sobota"
+9,"Novo mesto",45.8019,15.1822,13,cloudy,"Novo mesto"
+10,Postojna,45.7664,14.1975,12,cloudy,Postojna
+11,Jesenice,46.4975,13.7175,10,,Rateče
+12,"Slovenj Gradec",46.49,15.1161,10,cloudy,"Slovenj Gradec"

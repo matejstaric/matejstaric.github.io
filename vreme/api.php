@@ -31,8 +31,17 @@ if (!$input) {
     exit();
 }
 
-// Required parameters
-$required = ['location_code', 'variable_ids', 'date_from', 'date_to'];
+// Check if this is a last30days request
+$isLast30Days = isset($input['last_30_days']) && $input['last_30_days'] === true;
+
+if ($isLast30Days) {
+    // For last 30 days, only location_code is required
+    $required = ['location_code'];
+} else {
+    // For regular requests, all parameters are required
+    $required = ['location_code', 'variable_ids', 'date_from', 'date_to'];
+}
+
 foreach ($required as $param) {
     if (!isset($input[$param])) {
         http_response_code(400);
@@ -42,37 +51,45 @@ foreach ($required as $param) {
 }
 
 $locationCode = $input['location_code'];
-$variableIds = $input['variable_ids']; // Array of variable IDs
-$dateFrom = $input['date_from'];
-$dateTo = $input['date_to'];
 
-// Validate dates
-if (!strtotime($dateFrom) || !strtotime($dateTo)) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Invalid date format']);
-    exit();
-}
-
-if (strtotime($dateFrom) > strtotime($dateTo)) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Date from must be before date to']);
-    exit();
+if ($isLast30Days) {
+    // For last 30 days, we don't need these parameters
+    $variableIds = [];
+    $dateFrom = null;
+    $dateTo = null;
+} else {
+    $variableIds = $input['variable_ids']; // Array of variable IDs
+    $dateFrom = $input['date_from'];
+    $dateTo = $input['date_to'];
+    
+    // Validate dates
+    if (!strtotime($dateFrom) || !strtotime($dateTo)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid date format']);
+        exit();
+    }
+    
+    if (strtotime($dateFrom) > strtotime($dateTo)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Date from must be before date to']);
+        exit();
+    }
 }
 
     // Location ID mapping (ARSO station IDs with required structure)
     $locations = [
-        'LJ' => ['id' => 1895, 'group' => 'dailyData0'],
-        'NG' => ['id' => 3001, 'group' => 'dailyData0'],
-        'MB' => ['id' => 1902, 'group' => 'dailyData0'],  
-        'NM' => ['id' => 1893, 'group' => 'dailyData0'],
-        'CE' => ['id' => 2482, 'group' => 'dailyData0'],
-        'KP' => ['id' => 1896, 'group' => 'dailyData0'],
-        'LI' => ['id' => 1900, 'group' => 'dailyData0'],
-        'BR' => ['id' => 3049, 'group' => 'dailyData0'],
-        'KR' => ['id' => 1890, 'group' => 'dailyData0'],
-        'SG' => ['id' => 1897, 'group' => 'dailyData0'],
-        'MS' => ['id' => 1894, 'group' => 'dailyData0'],
-        'KG' => ['id' => 1086, 'group' => 'dailyData0']
+        'LJ' => ['id' => 1895, 'group' => 'dailyData0', 'slug' => 'ljubljana'],
+        'NG' => ['id' => 3001, 'group' => 'dailyData0', 'slug' => 'doblice'],
+        'MB' => ['id' => 1902, 'group' => 'dailyData0', 'slug' => 'maribor'],  
+        'NM' => ['id' => 1893, 'group' => 'dailyData0', 'slug' => 'novo-mesto'],
+        'CE' => ['id' => 2482, 'group' => 'dailyData0', 'slug' => 'celje'],
+        'KP' => ['id' => 1896, 'group' => 'dailyData0', 'slug' => 'koper'],
+        'LI' => ['id' => 1900, 'group' => 'dailyData0', 'slug' => 'lisca'],
+        'BR' => ['id' => 3049, 'group' => 'dailyData0', 'slug' => 'brnik'],
+        'KR' => ['id' => 1890, 'group' => 'dailyData0', 'slug' => 'kredarica'],
+        'SG' => ['id' => 1897, 'group' => 'dailyData0', 'slug' => 'slovenj-gradec'],
+        'MS' => ['id' => 1894, 'group' => 'dailyData0', 'slug' => 'murska-sobota'],
+        'KG' => ['id' => 1086, 'group' => 'dailyData0', 'slug' => 'kranj']
     ];
 
 // Variable mapping to ARSO variable IDs (direct mapping only)
@@ -93,88 +110,147 @@ if (!$locationInfo) {
     exit();
 }
 
-// Map variable IDs to ARSO IDs
-$arsoVariableIds = [];
-foreach ($variableIds as $varId) {
-    if (isset($variableMapping[$varId])) {
-        $arsoVariableIds[] = $variableMapping[$varId];
+if ($isLast30Days) {
+    // Handle Last 30 Days request
+    try {
+        $slug = $locationInfo['slug'];
+        $textUrl = "https://meteo.arso.gov.si/uploads/probase/www/climate/graph/sl/by_location/{$slug}/last30days_{$slug}.txt";
+        
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => [
+                    'User-Agent: Mozilla/5.0 (compatible; WeatherApp/1.0)',
+                    'Accept: text/plain'
+                ],
+                'timeout' => 30
+            ]
+        ]);
+        
+        error_log('Fetching ARSO Last 30 Days URL: ' . $textUrl);
+        $textContent = file_get_contents($textUrl, false, $context);
+        
+        if ($textContent === false) {
+            throw new Exception('Failed to fetch last 30 days data from ARSO');
+        }
+        
+        // Parse the text format
+        $parsedData = parseLast30DaysText($textContent);
+        
+        if (!$parsedData) {
+            throw new Exception('Failed to parse last 30 days text data');
+        }
+        
+        // Return the response
+        echo json_encode([
+            'success' => true,
+            'data' => $parsedData,
+            'is_last_30_days' => true,
+            'meta' => [
+                'location_code' => $locationCode,
+                'location_id' => $locationInfo['id'],
+                'slug' => $slug,
+                'source_url' => $textUrl,
+                'data_type' => 'last_30_days'
+            ]
+        ]);
+        
+    } catch (Exception $e) {
+        error_log('ARSO Last 30 Days Error: ' . $e->getMessage());
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Failed to fetch last 30 days data: ' . $e->getMessage(),
+            'debug_url' => $textUrl ?? 'URL not constructed'
+        ]);
     }
-}
-
-if (empty($arsoVariableIds)) {
-    http_response_code(400);
-    echo json_encode(['error' => 'No valid variable IDs provided']);
-    exit();
-}
-
-// Build ARSO API URL
-$varsParam = implode(',', $arsoVariableIds);
-$nocache = 'mg' . uniqid();
-$arsoUrl = "https://meteo.arso.gov.si/webmet/archive/data.xml?" . http_build_query([
-    'lang' => 'si',
-    'vars' => $varsParam,
-    'group' => $locationInfo['group'],
-    'type' => 'daily',
-    'id' => $locationInfo['id'],
-    'd1' => $dateFrom,
-    'd2' => $dateTo,
-    'nocache' => $nocache
-]);
-
-// Fetch data from ARSO
-try {
-    $context = stream_context_create([
-        'http' => [
-            'method' => 'GET',
-            'header' => [
-                'User-Agent: Mozilla/5.0 (compatible; WeatherApp/1.0)',
-                'Accept: application/xml, text/xml'
-            ],
-            'timeout' => 30
-        ]
+    
+} else {
+    // Handle regular API request
+    
+    // Map variable IDs to ARSO IDs
+    $arsoVariableIds = [];
+    foreach ($variableIds as $varId) {
+        if (isset($variableMapping[$varId])) {
+            $arsoVariableIds[] = $variableMapping[$varId];
+        }
+    }
+    
+    if (empty($arsoVariableIds)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'No valid variable IDs provided']);
+        exit();
+    }
+    
+    // Build ARSO API URL
+    $varsParam = implode(',', $arsoVariableIds);
+    $nocache = 'mg' . uniqid();
+    $arsoUrl = "https://meteo.arso.gov.si/webmet/archive/data.xml?" . http_build_query([
+        'lang' => 'si',
+        'vars' => $varsParam,
+        'group' => $locationInfo['group'],
+        'type' => 'daily',
+        'id' => $locationInfo['id'],
+        'd1' => $dateFrom,
+        'd2' => $dateTo,
+        'nocache' => $nocache
     ]);
     
-    error_log('Fetching ARSO URL: ' . $arsoUrl);
-    $xmlContent = file_get_contents($arsoUrl, false, $context);
+    // Fetch data from ARSO
+    try {
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => [
+                    'User-Agent: Mozilla/5.0 (compatible; WeatherApp/1.0)',
+                    'Accept: application/xml, text/xml'
+                ],
+                'timeout' => 30
+            ]
+        ]);
+        
+        error_log('Fetching ARSO URL: ' . $arsoUrl);
+        $xmlContent = file_get_contents($arsoUrl, false, $context);
+        
+        if ($xmlContent === false) {
+            throw new Exception('Failed to fetch data from ARSO');
+        }
     
-    if ($xmlContent === false) {
-        throw new Exception('Failed to fetch data from ARSO');
-    }
-
-    // Parse the PUJS format
-    $arsoData = parseArsoXml($xmlContent);
+        // Parse the PUJS format
+        $arsoData = parseArsoXml($xmlContent);
+        
+        if (!$arsoData) {
+            throw new Exception('Failed to parse ARSO data - check error logs for details');
+        }
     
-    if (!$arsoData) {
-        throw new Exception('Failed to parse ARSO data - check error logs for details');
+        // Transform points to include human-readable dates
+        if (isset($arsoData['points'])) {
+            $arsoData['points'] = transformPointsWithDates($arsoData['points']);
+        }
+    
+        // Return the response
+        echo json_encode([
+            'success' => true,
+            'data' => $arsoData,
+            'is_last_30_days' => false,
+            'meta' => [
+                'location_code' => $locationCode,
+                'location_id' => $locationInfo['id'],
+                'variable_ids' => $variableIds,
+                'arso_variable_ids' => $arsoVariableIds,
+                'date_from' => $dateFrom,
+                'date_to' => $dateTo,
+                'arso_url' => $arsoUrl
+            ]
+        ]);
+    
+    } catch (Exception $e) {
+        error_log('ARSO API Error: ' . $e->getMessage());
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Failed to fetch data: ' . $e->getMessage(),
+            'debug_url' => $arsoUrl ?? 'URL not constructed'
+        ]);
     }
-
-    // Transform points to include human-readable dates
-    if (isset($arsoData['points'])) {
-        $arsoData['points'] = transformPointsWithDates($arsoData['points']);
-    }
-
-    // Return the response
-    echo json_encode([
-        'success' => true,
-        'data' => $arsoData,
-        'meta' => [
-            'location_code' => $locationCode,
-            'location_id' => $locationInfo['id'],
-            'variable_ids' => $variableIds,
-            'arso_variable_ids' => $arsoVariableIds,
-            'date_from' => $dateFrom,
-            'date_to' => $dateTo,
-            'arso_url' => $arsoUrl
-        ]
-    ]);
-
-} catch (Exception $e) {
-    error_log('ARSO API Error: ' . $e->getMessage());
-    http_response_code(500);
-    echo json_encode([
-        'error' => 'Failed to fetch data: ' . $e->getMessage(),
-        'debug_url' => $arsoUrl ?? 'URL not constructed'
-    ]);
 }
 
 /**
@@ -466,6 +542,109 @@ function transformPointsWithDates($points) {
     }
     
     return $result;
+}
+
+/**
+ * Parse Last 30 Days text format from ARSO
+ */
+function parseLast30DaysText($textContent) {
+    $lines = explode("\n", $textContent);
+    $data = [];
+    $variables = [];
+    $inDataSection = false;
+    
+    // Define variable mappings based on the text format
+    $variableMapping = [
+        'Datum' => ['id' => 'date', 'name' => 'Datum', 'unit' => ''],
+        'Tpovp' => ['id' => 'temp_avg', 'name' => 'Povprečna temperatura', 'unit' => '°C'],
+        'Tpovp_ref' => ['id' => 'temp_avg_ref', 'name' => 'Povprečna temperatura (ref)', 'unit' => '°C'],
+        'Tmin' => ['id' => 'temp_min', 'name' => 'Najnižja temperatura', 'unit' => '°C'],
+        'Tmin_ref' => ['id' => 'temp_min_ref', 'name' => 'Najnižja temperatura (ref)', 'unit' => '°C'],
+        'Tmaks' => ['id' => 'temp_max', 'name' => 'Najvišja temperatura', 'unit' => '°C'],
+        'Tmaks_ref' => ['id' => 'temp_max_ref', 'name' => 'Najvišja temperatura (ref)', 'unit' => '°C'],
+        'Pad' => ['id' => 'precipitation', 'name' => 'Padavine', 'unit' => 'mm'],
+        'Sneg' => ['id' => 'snow', 'name' => 'Snežna odeja', 'unit' => 'cm'],
+        'Sref' => ['id' => 'snow_ref', 'name' => 'Snežna odeja (ref)', 'unit' => 'cm'],
+        'SOTr' => ['id' => 'sunshine', 'name' => 'Sončno obsevanje', 'unit' => 'h'],
+        'SORf' => ['id' => 'sunshine_ref', 'name' => 'Sončno obsevanje (ref)', 'unit' => 'h'],
+        'Glob' => ['id' => 'global_radiation', 'name' => 'Globalni obsev', 'unit' => 'kWh/m²']
+    ];
+    
+    $headerFound = false;
+    $columnNames = [];
+    
+    foreach ($lines as $line) {
+        $line = trim($line);
+        
+        if (empty($line)) continue;
+        
+        // Look for header line with column names
+        if (!$headerFound && preg_match('/^\s*Datum\s+Tpovp/', $line)) {
+            $headerFound = true;
+            // Extract column names
+            $columnNames = preg_split('/\s+/', trim($line));
+            $inDataSection = true;
+            
+            // Map variables
+            foreach ($columnNames as $index => $colName) {
+                if (isset($variableMapping[$colName])) {
+                    $variables[$index] = $variableMapping[$colName];
+                }
+            }
+            continue;
+        }
+        
+        // Parse data lines
+        if ($inDataSection && preg_match('/^\s*\d+\.\d+\.\d+/', $line)) {
+            $values = preg_split('/\s+/', trim($line));
+            
+            if (count($values) >= count($columnNames)) {
+                $row = [];
+                
+                foreach ($columnNames as $index => $colName) {
+                    $value = isset($values[$index]) ? trim($values[$index]) : '';
+                    
+                    if ($colName === 'Datum') {
+                        // Convert date from DD.MM.YYYY to YYYY-MM-DD
+                        if (preg_match('/(\d+)\.(\d+)\.(\d+)/', $value, $matches)) {
+                            $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
+                            $month = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
+                            $year = $matches[3];
+                            $value = "$year-$month-$day";
+                        }
+                        $row['date'] = $value;
+                    } else {
+                        // Convert numeric values
+                        if ($value !== '' && is_numeric($value)) {
+                            $row[$variables[$index]['id']] = (float)$value;
+                        } else {
+                            $row[$variables[$index]['id']] = null;
+                        }
+                    }
+                }
+                
+                if (isset($row['date'])) {
+                    $data[] = $row;
+                }
+            }
+        }
+        
+        // Stop parsing when we hit the legend
+        if (strpos($line, 'Legenda:') !== false) {
+            break;
+        }
+    }
+    
+    // Sort data by date
+    usort($data, function($a, $b) {
+        return strcmp($a['date'], $b['date']);
+    });
+    
+    return [
+        'variables' => $variables,
+        'data' => $data,
+        'count' => count($data)
+    ];
 }
 
 ?>
