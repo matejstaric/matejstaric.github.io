@@ -1,0 +1,2183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HDTV Stage (1920×1080) — Map + Absolute Elements</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --stage-w: 1920;
+      --stage-h: 1080;
+      --panel-w: 360px;
+      --bg: #0b0f17;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --accent: #7aa7ff;
+      --danger: #ff6b6b;
+      --ok: #4ade80;
+      --grid: rgba(255,255,255,.06);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 600px at 30% 10%, rgba(122,167,255,.12), transparent 60%),
+                  radial-gradient(1000px 700px at 80% 20%, rgba(74,222,128,.10), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      font: 14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 1fr var(--panel-w);
+      min-height: 100vh;
+    }
+
+    /* LEFT: stage area */
+    .stageArea {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    /* Wrapper maintains 16:9 and scales stage to fit */
+    .stageWrap {
+      width: min(calc(100vw - var(--panel-w) - 36px), calc(100vh - 36px) * 16 / 9);
+      height: min(calc(100vh - 36px), calc(100vw - var(--panel-w) - 36px) * 9 / 16);
+      aspect-ratio: 16 / 9;
+      border-radius: 18px;
+      background: rgba(0,0,0,.25);
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.10);
+    }
+
+    /* Stage is ALWAYS 1920×1080 internally; we scale it */
+    .stage {
+      width: calc(var(--stage-w) * 1px);
+      height: calc(var(--stage-h) * 1px);
+      transform-origin: 0 0;
+      position: absolute;
+      left: 0; top: 0;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      user-select: none;
+    }
+
+    /* Video background */
+    .videoBg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Optional grid overlay */
+    .gridOverlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    
+    .gridOverlay::after {
+      content: '';
+      position: absolute;
+      top: 5%;
+      left: 5%;
+      width: 90%;
+      height: 90%;
+      border: 2px dashed rgba(255,100,100,0.7);
+      box-sizing: border-box;
+    }
+    
+    /* Inner 80% safe area */
+    .innerSafeArea {
+      position: absolute;
+      top: 10%;
+      left: 10%;
+      width: 80%;
+      height: 80%;
+      border: 2px solid rgba(255,200,100,0.8);
+      box-sizing: border-box;
+      pointer-events: none;
+      z-index: 1001;
+    }
+
+    /* Slide title element styling */
+    .el.slideTitle {
+      background: #E4E4E4;
+      width: 100% !important;
+      height: 76px !important;
+      top: 78px !important;
+      left: 0 !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Hind", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      font-weight: 700;
+      letter-spacing: 2%;
+      color: #0B0041;
+      font-size: 72px;
+      line-height: 1;
+      border-radius: 0;
+      box-shadow: none;
+      backdrop-filter: none;
+      text-shadow: none;
+      padding: 20px 20px 0;
+    }
+
+    /* Slide subtitle element styling */
+    .el.slideSubtitle {
+      background: #F3001D;
+      width: calc(1920px - 96px) !important;
+      height: 54px !important;
+      top: 159px !important;
+      left: 96px !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Hind", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      font-weight: 700;
+      letter-spacing: 2%;
+      color: white;
+      font-size: 36px;
+      line-height: 1;
+      border-radius: 0;
+      box-shadow: none;
+      backdrop-filter: none;
+      text-shadow: none;
+      padding: 10px 96px 0 0;
+    }
+    
+    .gridOverlay::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        /* Rule of thirds - vertical lines */
+        linear-gradient(90deg, transparent calc(33.333% - 1px), rgba(255,255,255,0.5) 33.333%, rgba(255,255,255,0.5) calc(33.333% + 1px), transparent calc(33.333% + 1px)),
+        linear-gradient(90deg, transparent calc(66.666% - 1px), rgba(255,255,255,0.5) 66.666%, rgba(255,255,255,0.5) calc(66.666% + 1px), transparent calc(66.666% + 1px)),
+        /* Rule of thirds - horizontal lines */
+        linear-gradient(0deg, transparent calc(33.333% - 1px), rgba(255,255,255,0.5) 33.333%, rgba(255,255,255,0.5) calc(33.333% + 1px), transparent calc(33.333% + 1px)),
+        linear-gradient(0deg, transparent calc(66.666% - 1px), rgba(255,255,255,0.5) 66.666%, rgba(255,255,255,0.5) calc(66.666% + 1px), transparent calc(66.666% + 1px));
+      outline: 2px solid rgba(255,200,100,0.8);
+      outline-offset: -10%;
+    }
+
+    /* Elements placed on stage */
+    .el {
+      position: absolute;
+      transform-origin: center;
+      cursor: grab;
+      outline: none;
+    }
+    .el:active { cursor: grabbing; }
+
+    /* Selected outline */
+    .el.selected {
+      box-shadow: 0 0 0 2px rgba(122,167,255,.95), 0 0 0 6px rgba(122,167,255,.18);
+      border-radius: 8px;
+    }
+
+    /* Text element styling */
+    .el.text {
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(0,0,0,.35);
+      backdrop-filter: blur(6px);
+      color: white;
+      font-weight: 600;
+      letter-spacing: .2px;
+      min-width: 120px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 0 1px 10px rgba(0,0,0,.7);
+    }
+
+    /* Image element styling */
+    .el.image {
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(255,255,255,.08);
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+    .el.image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* Table-like row element (Figma match) */
+.el.row {
+  display: grid;
+  grid-template-columns: 1fr var(--row-right-w, 229px);
+  border-radius: 0px; /* your SVG looks square */
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0,0,0,.18);
+}
+
+.el.row .cell-left,
+.el.row .cell-right {
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  font-family: "Hind", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  font-size: 32px; /* tweak to match your design */
+  line-height: 1;
+}
+
+.el.row .cell-left {
+  color: #000;
+  /* Figma left gradient: white -> #CCCCCC, 0.9 opacity */
+  background: linear-gradient(90deg, rgba(255,255,255,.9) 0%, rgba(204,204,204,.9) 100%);
+  font-weight: 400;
+}
+
+.el.row .cell-right {
+  color: #fff;
+  font-weight: 700;
+  /* Figma right gradient: #243048 -> #5774AE at diagonal */
+  background: linear-gradient(135deg, #243048 0%, #5774AE 100%);
+  justify-content: center;
+  text-shadow: 0 1px 10px rgba(0,0,0,.35);
+}
+
+    /* Table element with multiple rows */
+    .el.table {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-radius: 8px;
+      overflow: visible;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .el.table .table-row {
+      display: grid;
+      grid-template-columns: auto var(--table-right-w, 300px);
+      min-height: 80px;
+      border-bottom: none;
+      gap: 10px;
+    }
+
+    .el.table .table-row:last-child {
+      border-bottom: none;
+    }
+
+    .el.table .table-cell-left,
+    .el.table .table-cell-right {
+      display: flex;
+      align-items: center;
+      padding: 32px 40px 28px;
+      font-size: 48px;
+      font-family: "Hind", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      line-height: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      border-radius: 4px;
+    }
+
+    .el.table .table-cell-left {
+      color: #000;
+      /* Same gradient as row left: white -> #CCCCCC, 0.9 opacity */
+      background: linear-gradient(90deg, rgba(255,255,255,.9) 0%, rgba(204,204,204,.9) 100%);
+      font-weight: 500;
+      padding-right: 80px;
+    }
+
+    .el.table .table-cell-right {
+      color: #fff;
+      /* Same gradient as row right: #243048 -> #5774AE at diagonal */
+      background: linear-gradient(135deg, #243048 0%, #5774AE 100%);
+      font-weight: 600;
+      justify-content: center;
+      text-shadow: 0 1px 10px rgba(0,0,0,.35);
+    }
+
+    .table-resize-handle {
+      position: absolute;
+      right: -6px;
+      top: 0;
+      bottom: 0;
+      width: 12px;
+      cursor: col-resize;
+      background: rgba(122,167,255,.2);
+      border-right: 2px solid rgba(122,167,255,.6);
+      border-radius: 2px;
+      pointer-events: all;
+    }
+
+    .el.table.resizing {
+      opacity: 0.8;
+    }
+
+    /* RIGHT: control panel */
+    .panel {
+      border-left: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      padding: 16px;
+      overflow: auto;
+    }
+
+    .panel h2 {
+      margin: 8px 0 10px;
+      font-size: 14px;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.75);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    input[type="number"], input[type="text"], select, textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      border-radius: 12px;
+      padding: 10px 10px;
+      color: var(--text);
+      outline: none;
+    }
+
+    textarea { min-height: 62px; resize: vertical; }
+
+    input[type="file"] {
+      width: 100%;
+      color: var(--muted);
+    }
+
+    .btnBar { display: flex; gap: 8px; flex-wrap: wrap; }
+    button {
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      padding: 10px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform .04s ease, background .15s ease, border-color .15s ease;
+      font-weight: 600;
+    }
+    button:hover { background: rgba(255,255,255,.12); }
+    button:active { transform: translateY(1px); }
+    button.primary { border-color: rgba(122,167,255,.55); background: rgba(122,167,255,.16); }
+    button.danger { border-color: rgba(255,107,107,.55); background: rgba(255,107,107,.14); }
+
+    .hint {
+      margin-top: 10px;
+      color: rgba(255,255,255,.6);
+      font-size: 12px;
+    }
+
+    .list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .listItem {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      cursor: pointer;
+    }
+    .listItem strong { font-size: 13px; }
+    .badge {
+      font-size: 11px;
+      color: rgba(255,255,255,.75);
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .small {
+      font-size: 12px;
+      color: rgba(255,255,255,.62);
+    }
+
+    .toggleLine {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .toggleLine input { transform: translateY(1px); }
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      color: rgba(255,255,255,.8);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="stageArea">
+      <div class="stageWrap" id="stageWrap">
+        <div class="stage" id="stage">
+          <video class="videoBg" id="videoBg" autoplay muted playsinline>
+            <source src="uk-rain.mp4" type="video/mp4">
+          </video>
+          <div class="gridOverlay" id="gridOverlay" hidden></div>
+          <div class="innerSafeArea" id="innerSafeArea" hidden></div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <div class="card">
+        <h2>Background (Map)</h2>
+        <label>
+          Upload background image
+          <input type="file" id="bgFile" accept="image/*" />
+        </label>
+        
+        <div id="bgImageControls" style="display:none;">
+          <div class="btnBar">
+            <button id="removeBgBtn" class="danger">Remove</button>
+          </div>
+          
+          <div class="toggleLine">
+            <label style="display:flex;gap:8px;align-items:center;">
+              <input type="checkbox" id="bgAnimToggle" />
+              Animate background
+            </label>
+          </div>
+          
+          <div id="bgAnimControls" style="display:none;">
+            <div class="row">
+              <label>
+                Duration (ms)
+                <input type="number" id="bgAnimDuration" value="3000" min="100" step="100" />
+              </label>
+              <label>
+                Easing
+                <select id="bgAnimEasing">
+                  <option value="ease">Ease</option>
+                  <option value="ease-in">Ease In</option>
+                  <option value="ease-out">Ease Out</option>
+                  <option value="ease-in-out">Ease In Out</option>
+                  <option value="linear">Linear</option>
+                  <option value="cubic-bezier(.2,.8,.2,1)">Custom</option>
+                </select>
+              </label>
+            </div>
+            <div class="btnBar">
+              <button id="setBgStartBtn">Set Start Position</button>
+              <button id="setBgEndBtn">Set End Position</button>
+            </div>
+            <div class="small" style="margin-top:8px;">
+              Drag/zoom background in preview to set keyframe positions
+            </div>
+          </div>
+        </div>
+        
+        <div class="toggleLine">
+          <label style="display:flex;gap:8px;align-items:center;">
+            <input type="checkbox" id="gridToggle" />
+            Show grid
+          </label>
+          <span class="small">Stage coords are <b>1920×1080</b>.</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Add elements</h2>
+        <div class="btnBar">
+          <button class="primary" id="addTextBtn">+ Text</button>
+          <button class="primary" id="addImageBtn">+ Image</button>
+          <button class="primary" id="addRowBtn">+ Row</button>
+          <button class="primary" id="addTableBtn">+ Table</button>
+          <button id="addPinBtn">+ Pin</button>
+          <button id="addSlideTitleBtn">+ Slide Title</button>
+          <button id="addSlideSubtitleBtn">+ Slide Subtitle</button>
+        </div>
+        <input type="file" id="imgFile" accept="image/*" hidden />
+        <div class="hint">
+          Drag elements on the stage. Use <span class="kbd">↑</span><span class="kbd">↓</span><span class="kbd">←</span><span class="kbd">→</span>
+          to nudge (hold <span class="kbd">Shift</span> for 10px).
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Selected element</h2>
+        <div class="split">
+          <label>
+            Name
+            <input type="text" id="propName" placeholder="e.g. label-city" />
+          </label>
+
+          <label>
+            Text (for text/pin)
+            <textarea id="propText" placeholder="Displayed text..."></textarea>
+          </label>
+
+          <label>
+            Right text (for row)
+            <textarea id="propRightText" placeholder="Right cell text..."></textarea>
+          </label>
+
+          <label>
+            Right width (px, for row)
+            <input type="number" id="propRightW" step="1" />
+          </label>
+
+          <label>
+            Table data (JSON array or paste rows)
+            <textarea id="propTableData" placeholder='[{"label":"City","value":"Temperature"},{"label":"Ljubljana","value":"5°C"}]'></textarea>
+          </label>
+
+          <label>
+            Table right column width (px)
+            <input type="number" id="propTableRightW" step="1" />
+          </label>
+
+          <div class="toggleLine">
+            <label style="display:flex;gap:8px;align-items:center;">
+              <input type="checkbox" id="propUppercase" />
+              Uppercase (for slide titles/subtitles)
+            </label>
+          </div>
+
+          <div class="row">
+            <label>X
+              <input type="number" id="propX" step="1" />
+            </label>
+            <label>Y
+              <input type="number" id="propY" step="1" />
+            </label>
+          </div>
+
+          <div class="row">
+            <label>W
+              <input type="number" id="propW" step="1" />
+            </label>
+            <label>H
+              <input type="number" id="propH" step="1" />
+            </label>
+          </div>
+
+          <div class="row">
+            <label>Rotate (deg)
+              <input type="number" id="propR" step="1" />
+            </label>
+            <label>Z-index
+              <input type="number" id="propZ" step="1" />
+            </label>
+          </div>
+
+          <div class="row">
+            <label>Animation
+              <select id="animPreset">
+                <option value="none">None</option>
+                <option value="fadeIn">Fade in</option>
+                <option value="pulse">Pulse</option>
+                <option value="slideInLeft">Slide in (left)</option>
+                <option value="slideInUp">Slide in (up)</option>
+                <option value="pop">Pop</option>
+              </select>
+            </label>
+            <label>Duration (ms)
+              <input type="number" id="animDuration" value="900" step="50" />
+            </label>
+          </div>
+
+          <div class="row">
+            <label>Delay (ms)
+              <input type="number" id="animDelay" value="0" step="50" />
+            </label>
+            <label>Loop
+              <select id="animLoop">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="btnBar">
+            <button id="applyPropsBtn">Apply</button>
+            <button id="playAnimBtn" class="primary">Play animation</button>
+            <button id="stopAnimBtn">Stop</button>
+            <button id="deleteBtn" class="danger">Delete</button>
+          </div>
+          
+          <div class="btnBar">
+            <button id="editAnimBtn">Edit Animation Mode</button>
+          </div>
+          
+          <div id="editAnimControls" style="display:none;">
+            <div class="btnBar">
+              <button id="setStartBtn">Set Start Position</button>
+              <button id="setEndBtn">Set End Position</button>
+              <button id="exitAnimBtn" class="primary">Exit Edit Mode</button>
+            </div>
+            <div class="small">
+              Drag, resize, and rotate element to set keyframes. Element will stay at end position when exiting.
+            </div>
+          </div>
+
+          <div class="small">
+            Tip: animations are done via the <b>Web Animations API</b>, so you can replace presets with your own keyframes easily.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Elements</h2>
+        <div class="btnBar">
+          <button id="exportBtn">Export JSON</button>
+          <button id="exportPresentBtn" class="primary">Export Presentation</button>
+          <button id="importBtn">Import JSON</button>
+        </div>
+        <textarea id="jsonBox" placeholder="Exported layout JSON appears here..."></textarea>
+        <div class="list" id="elList"></div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // --- Stage scaling (fit 1920×1080 into wrapper) ---
+    const STAGE_W = 1920;
+    const STAGE_H = 1080;
+
+    const stageWrap = document.getElementById('stageWrap');
+    const stage = document.getElementById('stage');
+    const gridOverlay = document.getElementById('gridOverlay');
+
+    function updateStageScale() {
+      const rect = stageWrap.getBoundingClientRect();
+      const sx = rect.width / STAGE_W;
+      const sy = rect.height / STAGE_H;
+      // rect is 16:9, so sx===sy, but we keep it safe:
+      const s = Math.min(sx, sy);
+      stage.style.transform = `scale(${s})`;
+    }
+    window.addEventListener('resize', updateStageScale);
+    updateStageScale();
+
+    // --- Background upload ---
+    let bgAnimData = {
+      enabled: false,
+      duration: 2000,
+      easing: 'ease-in-out',
+      startScale: 1,
+      startX: 50,
+      startY: 50,
+      endScale: 1.2,
+      endX: 50,
+      endY: 50
+    };
+    
+    document.getElementById('bgFile').addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      stage.style.backgroundImage = `url("${url}")`;
+      // Background starts locked - no automatic manipulation
+      disableBgManipulation();
+      
+      // Show background controls when image is uploaded
+      document.getElementById('bgImageControls').style.display = 'block';
+    });
+
+    document.getElementById('removeBgBtn').addEventListener('click', () => {
+      stage.style.backgroundImage = '';
+      disableBgManipulation();
+      
+      // Hide background controls when image is removed
+      document.getElementById('bgImageControls').style.display = 'none';
+      document.getElementById('bgAnimControls').style.display = 'none';
+      document.getElementById('bgAnimToggle').checked = false;
+      bgAnimData.enabled = false;
+      
+      // Reset button states
+      document.getElementById('setBgStartBtn').textContent = 'Edit Start';
+      document.getElementById('setBgEndBtn').textContent = 'Edit End';
+      bgEditingMode = null;
+    });
+
+    document.getElementById('bgAnimToggle').addEventListener('change', (e) => {
+      bgAnimData.enabled = e.target.checked;
+      document.getElementById('bgAnimControls').style.display = e.target.checked ? 'block' : 'none';
+      
+      // Don't automatically enable manipulation - only when setting positions
+      if (!e.target.checked) {
+        disableBgManipulation();
+        // Reset button states
+        document.getElementById('setBgStartBtn').textContent = 'Edit Start';
+        document.getElementById('setBgEndBtn').textContent = 'Edit End';
+        bgEditingMode = null;
+      }
+    });
+
+    document.getElementById('bgAnimDuration').addEventListener('input', (e) => {
+      bgAnimData.duration = parseInt(e.target.value);
+    });
+
+    document.getElementById('bgAnimEasing').addEventListener('change', (e) => {
+      bgAnimData.easing = e.target.value;
+    });
+
+    let bgEditingMode = null; // null, 'start', or 'end'
+
+    document.getElementById('setBgStartBtn').addEventListener('click', () => {
+      if (bgEditingMode === 'start') {
+        // Save start position
+        const computedStyle = window.getComputedStyle(stage);
+        const bgSize = computedStyle.backgroundSize;
+        const bgPosition = computedStyle.backgroundPosition;
+        
+        // Parse current values
+        if (bgSize.includes('%')) {
+          bgAnimData.startScale = parseFloat(bgSize.split(' ')[0]) / 100 || 1;
+        } else {
+          bgAnimData.startScale = 1;
+        }
+        
+        const pos = bgPosition.split(' ');
+        bgAnimData.startX = parseFloat(pos[0]) || 50;
+        bgAnimData.startY = parseFloat(pos[1]) || 50;
+        
+        // Exit editing mode
+        disableBgManipulation();
+        document.getElementById('setBgStartBtn').textContent = 'Set Start Position';
+        bgEditingMode = null;
+        
+        alert('Start position saved!');
+      } else {
+        // Enter start position editing mode
+        bgEditingMode = 'start';
+        enableBgManipulation();
+        document.getElementById('setBgStartBtn').textContent = 'Save Start';
+        
+        // If end editing is active, exit it
+        if (document.getElementById('setBgEndBtn').textContent === 'Save End Position') {
+          document.getElementById('setBgEndBtn').textContent = 'Set End Position';
+        }
+      }
+    });
+
+    document.getElementById('setBgEndBtn').addEventListener('click', () => {
+      if (bgEditingMode === 'end') {
+        // Save end position
+        const computedStyle = window.getComputedStyle(stage);
+        const bgSize = computedStyle.backgroundSize;
+        const bgPosition = computedStyle.backgroundPosition;
+        
+        // Parse current values
+        if (bgSize.includes('%')) {
+          bgAnimData.endScale = parseFloat(bgSize.split(' ')[0]) / 100 || 1.2;
+        } else {
+          bgAnimData.endScale = 1.2;
+        }
+        
+        const pos = bgPosition.split(' ');
+        bgAnimData.endX = parseFloat(pos[0]) || 50;
+        bgAnimData.endY = parseFloat(pos[1]) || 50;
+        
+        // Exit editing mode
+        disableBgManipulation();
+        document.getElementById('setBgEndBtn').textContent = 'Edit End';
+        bgEditingMode = null;
+        
+        alert('End position saved!');
+      } else {
+        // Enter end position editing mode
+        bgEditingMode = 'end';
+        enableBgManipulation();
+        document.getElementById('setBgEndBtn').textContent = 'Save End';
+        
+        // If start editing is active, exit it
+        if (document.getElementById('setBgStartBtn').textContent === 'Save Start') {
+          document.getElementById('setBgStartBtn').textContent = 'Edit Start';
+        }
+      }
+    });
+
+    let bgManipulationEnabled = false;
+    let bgEventListeners = [];
+
+    function enableBgManipulation() {
+      if (bgManipulationEnabled) return; // Already enabled
+      bgManipulationEnabled = true;
+      
+      let isDragging = false;
+      let startX, startY, currentX = 50, currentY = 50, currentScale = 100;
+      
+      // Parse current background properties if they exist
+      const computedStyle = window.getComputedStyle(stage);
+      const bgPos = computedStyle.backgroundPosition;
+      const bgSize = computedStyle.backgroundSize;
+      
+      if (bgPos !== 'initial') {
+        const pos = bgPos.split(' ');
+        currentX = parseFloat(pos[0]) || 50;
+        currentY = parseFloat(pos[1]) || 50;
+      }
+      
+      if (bgSize.includes('%')) {
+        currentScale = parseFloat(bgSize.split(' ')[0]) || 100;
+      }
+      
+      const pointerDownHandler = (e) => {
+        if (e.target !== stage) return;
+        if (e.detail === 2) return; // Ignore if double-click
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        stage.style.cursor = 'grab';
+        e.preventDefault();
+      };
+      
+      const pointerMoveHandler = (e) => {
+        if (!isDragging) return;
+        const deltaX = (e.clientX - startX) * 0.5;
+        const deltaY = (e.clientY - startY) * 0.5;
+        currentX = Math.max(0, Math.min(100, currentX + deltaX / 10));
+        currentY = Math.max(0, Math.min(100, currentY + deltaY / 10));
+        stage.style.backgroundPosition = `${currentX}% ${currentY}%`;
+        startX = e.clientX;
+        startY = e.clientY;
+      };
+      
+      const pointerUpHandler = () => {
+        isDragging = false;
+        stage.style.cursor = '';
+      };
+      
+      const wheelHandler = (e) => {
+        if (!bgAnimData.enabled) return;
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -5 : 5;
+        currentScale = Math.max(50, Math.min(200, currentScale + delta));
+        stage.style.backgroundSize = `${currentScale}% ${currentScale}%`;
+      };
+      
+      const doubleClickHandler = (e) => {
+        if (e.target !== stage) return;
+        // Reset to cover the whole preview
+        stage.style.backgroundSize = 'cover';
+        stage.style.backgroundPosition = 'center';
+        currentX = 50;
+        currentY = 50;
+        currentScale = 100;
+        e.preventDefault();
+      };
+      
+      stage.addEventListener('pointerdown', pointerDownHandler);
+      document.addEventListener('pointermove', pointerMoveHandler);
+      document.addEventListener('pointerup', pointerUpHandler);
+      stage.addEventListener('wheel', wheelHandler);
+      stage.addEventListener('dblclick', doubleClickHandler);
+      
+      // Store references for cleanup
+      bgEventListeners = [
+        { target: stage, type: 'pointerdown', handler: pointerDownHandler },
+        { target: document, type: 'pointermove', handler: pointerMoveHandler },
+        { target: document, type: 'pointerup', handler: pointerUpHandler },
+        { target: stage, type: 'wheel', handler: wheelHandler },
+        { target: stage, type: 'dblclick', handler: doubleClickHandler }
+      ];
+    }
+    
+    function disableBgManipulation() {
+      if (!bgManipulationEnabled) return; // Already disabled
+      bgManipulationEnabled = false;
+      
+      // Remove all event listeners
+      bgEventListeners.forEach(({ target, type, handler }) => {
+        target.removeEventListener(type, handler);
+      });
+      bgEventListeners = [];
+      
+      // Reset background properties to default
+      stage.style.backgroundSize = 'cover';
+      stage.style.backgroundPosition = 'center';
+      stage.style.cursor = '';
+      
+      // Reset editing mode if not in a save state
+      if (bgEditingMode && !document.getElementById('setBgStartBtn').textContent.includes('Save') && !document.getElementById('setBgEndBtn').textContent.includes('Save')) {
+        bgEditingMode = null;
+      }
+    }
+
+    function playBgAnimation() {
+      if (!bgAnimData.enabled) return;
+      
+      // Set starting position
+      stage.style.backgroundSize = `${bgAnimData.startScale * 100}% ${bgAnimData.startScale * 100}%`;
+      stage.style.backgroundPosition = `${bgAnimData.startX}% ${bgAnimData.startY}%`;
+      
+      // Animate to end position
+      stage.animate([
+        {
+          backgroundSize: `${bgAnimData.startScale * 100}% ${bgAnimData.startScale * 100}%`,
+          backgroundPosition: `${bgAnimData.startX}% ${bgAnimData.startY}%`
+        },
+        {
+          backgroundSize: `${bgAnimData.endScale * 100}% ${bgAnimData.endScale * 100}%`,
+          backgroundPosition: `${bgAnimData.endX}% ${bgAnimData.endY}%`
+        }
+      ], {
+        duration: bgAnimData.duration,
+        easing: bgAnimData.easing,
+        fill: 'forwards'
+      });
+    }
+
+    document.getElementById('gridToggle').addEventListener('change', (e) => {
+      const innerSafeArea = document.getElementById('innerSafeArea');
+      gridOverlay.hidden = !e.target.checked;
+      innerSafeArea.hidden = !e.target.checked;
+    });
+
+    // --- Element model ---
+    /** @type {{id:string,type:'text'|'image'|'pin'|'row'|'table'|'slideTitle'|'slideSubtitle',name:string,x:number,y:number,w:number,h:number,r:number,z:number,text?:string,rightText?:string,rightW?:number,src?:string,tableData?:Array<{label:string,value:string}>,tableRightW?:number,uppercase?:boolean}[]} */
+    let elements = [];
+    let selectedId = null;
+
+    function uid() {
+      return Math.random().toString(36).slice(2, 9);
+    }
+
+    function createElDOM(el) {
+      const node = document.createElement('div');
+      node.className = `el ${el.type === 'pin' ? 'text' : el.type}`;
+      node.tabIndex = 0;
+      node.dataset.id = el.id;
+
+      if (el.type === 'text') {
+        node.classList.add('text');
+        node.textContent = el.text ?? 'Text';
+      } else if (el.type === 'pin') {
+        // Simple "pin" made with text + dot via background
+        node.classList.add('text');
+        node.style.paddingLeft = '34px';
+        node.style.position = 'absolute';
+        node.style.backgroundImage =
+          'radial-gradient(circle at 18px 50%, rgba(255,255,255,.95) 0 4px, rgba(122,167,255,.85) 5px 9px, transparent 10px)';
+        node.style.backgroundRepeat = 'no-repeat';
+        node.style.backgroundSize = '34px 34px';
+        node.textContent = el.text ?? 'Pin';
+      } else if (el.type === 'image') {
+        const img = document.createElement('img');
+        img.draggable = false;
+        img.src = el.src ?? '';
+        node.appendChild(img);
+      } else if (el.type === 'row') {
+        node.classList.add('row');
+        node.innerHTML = `
+          <div class="cell-left"></div>
+          <div class="cell-right"></div>
+        `;
+        node.style.setProperty('--row-right-w', (el.rightW ?? 229) + 'px');
+
+        const left = node.querySelector('.cell-left');
+        const right = node.querySelector('.cell-right');
+        left.textContent = el.text ?? 'Left label';
+        right.textContent = el.rightText ?? 'Right';
+      } else if (el.type === 'table') {
+        node.classList.add('table');
+        node.style.setProperty('--table-right-w', (el.tableRightW ?? 200) + 'px');
+        node.style.position = 'relative';
+        node.innerHTML = '';
+        
+        const rows = el.tableData ?? [
+          { label: 'Label 1', value: 'Value 1' },
+          { label: 'Label 2', value: 'Value 2' }
+        ];
+        
+        rows.forEach(row => {
+          const rowDiv = document.createElement('div');
+          rowDiv.className = 'table-row';
+          rowDiv.innerHTML = `
+            <div class="table-cell-left">${escapeHTML(row.label)}</div>
+            <div class="table-cell-right">${escapeHTML(row.value)}</div>
+          `;
+          node.appendChild(rowDiv);
+        });
+
+        // Add resize handle
+        const resizeHandle = document.createElement('div');
+        resizeHandle.className = 'table-resize-handle';
+        resizeHandle.style.pointerEvents = 'auto';
+        node.appendChild(resizeHandle);
+
+        // Enable resize
+        enableTableResize(node, el);
+      } else if (el.type === 'slideTitle') {
+        node.classList.add('slideTitle');
+        node.textContent = el.text ?? 'Slide Title';
+      } else if (el.type === 'slideSubtitle') {
+        node.classList.add('slideSubtitle');
+        node.textContent = el.text ?? 'Slide Subtitle';
+      }
+
+
+      // Click selects
+      node.addEventListener('pointerdown', (ev) => {
+        ev.stopPropagation();
+        selectEl(el.id);
+      });
+
+      // Dragging
+      enableDrag(node);
+
+      stage.appendChild(node);
+      applyElStyle(el);
+    }
+
+    function applyElStyle(el) {
+      const node = stage.querySelector(`.el[data-id="${el.id}"]`);
+      if (!node) return;
+      node.style.left = el.x + 'px';
+      node.style.top = el.y + 'px';
+      node.style.width = el.w + 'px';
+      node.style.height = el.h + 'px';
+      node.style.transform = `rotate(${el.r}deg)`;
+      node.style.zIndex = String(el.z);
+
+      if (el.type === 'text' || el.type === 'pin') {
+        node.textContent = el.text ?? (el.type === 'pin' ? 'Pin' : 'Text');
+      }
+      if (el.type === 'slideTitle') {
+        node.textContent = el.text ?? 'Slide Title';
+        // Force slide title positioning
+        node.style.left = '0px';
+        node.style.top = '78px';
+        node.style.width = '1920px';
+        node.style.height = '76px';
+        node.style.textTransform = el.uppercase ? 'uppercase' : 'none';
+      }
+      if (el.type === 'slideSubtitle') {
+        node.textContent = el.text ?? 'Slide Subtitle';
+        // Force slide subtitle positioning
+        node.style.left = '96px';
+        node.style.top = '159px';
+        node.style.width = '1824px';
+        node.style.height = '54px';
+        node.style.textTransform = el.uppercase ? 'uppercase' : 'none';
+      }
+      if (el.type === 'image') {
+        const img = node.querySelector('img');
+        if (img && el.src) img.src = el.src;
+      }
+      if (el.type === 'row') {
+        const left = node.querySelector('.cell-left');
+        const right = node.querySelector('.cell-right');
+        if (left) left.textContent = el.text ?? 'Left label';
+        if (right) right.textContent = el.rightText ?? 'Right';
+        node.style.setProperty('--row-right-w', (el.rightW ?? 229) + 'px');
+      }
+      if (el.type === 'table') {
+        node.style.setProperty('--table-right-w', (el.tableRightW ?? 200) + 'px');
+        node.innerHTML = '';
+        
+        const rows = el.tableData ?? [
+          { label: 'Label 1', value: 'Value 1' },
+          { label: 'Label 2', value: 'Value 2' }
+        ];
+        
+        rows.forEach(row => {
+          const rowDiv = document.createElement('div');
+          rowDiv.className = 'table-row';
+          rowDiv.innerHTML = `
+            <div class="table-cell-left">${escapeHTML(row.label)}</div>
+            <div class="table-cell-right">${escapeHTML(row.value)}</div>
+          `;
+          node.appendChild(rowDiv);
+        });
+
+        // Re-add resize handle and re-enable resize
+        const resizeHandle = document.createElement('div');
+        resizeHandle.className = 'table-resize-handle';
+        resizeHandle.style.pointerEvents = 'auto';
+        node.appendChild(resizeHandle);
+        enableTableResize(node, el);
+      }
+    }
+
+    function renderList() {
+      const list = document.getElementById('elList');
+      list.innerHTML = '';
+      elements
+        .slice()
+        .sort((a,b) => a.z - b.z)
+        .forEach(el => {
+          const item = document.createElement('div');
+          item.className = 'listItem';
+          item.dataset.id = el.id;
+          item.innerHTML = `
+            <div>
+              <strong>${escapeHTML(el.name || el.type.toUpperCase())}</strong>
+              <div class="small">#${el.id} — x:${el.x} y:${el.y} z:${el.z}</div>
+            </div>
+            <span class="badge">${el.type}</span>
+          `;
+          item.addEventListener('click', () => selectEl(el.id));
+          list.appendChild(item);
+        });
+    }
+
+    function escapeHTML(s) {
+      return String(s)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function selectEl(id) {
+      selectedId = id;
+      // toggle selected class
+      stage.querySelectorAll('.el').forEach(n => n.classList.remove('selected'));
+      const node = stage.querySelector(`.el[data-id="${id}"]`);
+      if (node) node.classList.add('selected');
+
+      // populate props
+      const el = elements.find(e => e.id === id);
+      if (!el) return;
+
+      document.getElementById('propName').value = el.name ?? '';
+      document.getElementById('propText').value = el.text ?? '';
+      document.getElementById('propRightText').value = el.rightText ?? '';
+      document.getElementById('propRightW').value = el.rightW ?? 229;
+      document.getElementById('propTableData').value = el.tableData ? JSON.stringify(el.tableData, null, 2) : '';
+      document.getElementById('propTableRightW').value = el.tableRightW ?? 100;
+      document.getElementById('propUppercase').checked = el.uppercase ?? true;
+      document.getElementById('propX').value = el.x;
+      document.getElementById('propY').value = el.y;
+      document.getElementById('propW').value = el.w;
+      document.getElementById('propH').value = el.h;
+      document.getElementById('propR').value = el.r;
+      document.getElementById('propZ').value = el.z;
+
+      renderList();
+    }
+
+    // Deselect on stage click
+    stage.addEventListener('pointerdown', () => {
+      selectedId = null;
+      stage.querySelectorAll('.el').forEach(n => n.classList.remove('selected'));
+      renderList();
+    });
+
+    // --- Dragging helper ---
+    function enableDrag(node) {
+      let startX=0, startY=0, baseX=0, baseY=0, dragging=false;
+
+      node.addEventListener('pointerdown', (ev) => {
+        // only left mouse / primary
+        if (ev.button !== undefined && ev.button !== 0) return;
+        // Don't drag if clicking on resize handle
+        if (ev.target.classList.contains('table-resize-handle')) return;
+        node.setPointerCapture(ev.pointerId);
+        dragging = true;
+
+        const id = node.dataset.id;
+        const el = elements.find(e => e.id === id);
+        if (!el) return;
+
+        startX = ev.clientX;
+        startY = ev.clientY;
+        baseX = el.x;
+        baseY = el.y;
+      });
+
+      node.addEventListener('pointermove', (ev) => {
+        if (!dragging) return;
+
+        const id = node.dataset.id;
+        const el = elements.find(e => e.id === id);
+        if (!el) return;
+
+        // Get stage scale more reliably
+        const stageRect = stage.getBoundingClientRect();
+        const wrapRect = stageWrap.getBoundingClientRect();
+        const scale = stageRect.width / STAGE_W;
+
+        // Convert screen delta to stage delta
+        const dx = (ev.clientX - startX) / scale;
+        const dy = (ev.clientY - startY) / scale;
+
+        el.x = clamp(Math.round(baseX + dx), 0, STAGE_W - el.w);
+        el.y = clamp(Math.round(baseY + dy), 0, STAGE_H - el.h);
+
+        applyElStyle(el);
+
+        // live update fields if selected
+        if (selectedId === id) {
+          document.getElementById('propX').value = el.x;
+          document.getElementById('propY').value = el.y;
+        }
+        renderList();
+      });
+
+      node.addEventListener('pointerup', () => { dragging = false; });
+      node.addEventListener('pointercancel', () => { dragging = false; });
+    }
+
+    function getStageScale() {
+      const m = stage.style.transform.match(/scale\(([^)]+)\)/);
+      return m ? parseFloat(m[1]) : 1;
+    }
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    // --- Table resize helper ---
+    function enableTableResize(node, el) {
+      const handle = node.querySelector('.table-resize-handle');
+      if (!handle) return;
+
+      let resizing = false;
+      let startX = 0;
+      let baseW = 0;
+
+      handle.addEventListener('pointerdown', (ev) => {
+        if (ev.button !== undefined && ev.button !== 0) return;
+        ev.stopPropagation();
+        resizing = true;
+        startX = ev.clientX;
+        baseW = el.w;
+        node.classList.add('resizing');
+      });
+
+      document.addEventListener('pointermove', (ev) => {
+        if (!resizing) return;
+
+        // Get stage scale more reliably
+        const stageRect = stage.getBoundingClientRect();
+        const scale = stageRect.width / STAGE_W;
+        
+        const dx = (ev.clientX - startX) / scale;
+        el.w = clamp(Math.round(baseW + dx), 100, STAGE_W);
+
+        applyElStyle(el);
+
+        if (selectedId === el.id) {
+          document.getElementById('propW').value = el.w;
+        }
+      });
+
+      document.addEventListener('pointerup', () => { 
+        resizing = false;
+        node.classList.remove('resizing');
+      });
+
+      document.addEventListener('pointercancel', () => { 
+        resizing = false;
+        node.classList.remove('resizing');
+      });
+    }
+
+    // --- Add elements ---
+    document.getElementById('addTextBtn').addEventListener('click', () => {
+      const el = {
+        id: uid(),
+        type: 'text',
+        name: 'label',
+        x: 120, y: 120,
+        w: 260, h: 60,
+        r: 0,
+        z: nextZ(),
+        text: 'Hello'
+      };
+      elements.push(el);
+      createElDOM(el);
+      selectEl(el.id);
+      renderList();
+    });
+
+    document.getElementById('addRowBtn').addEventListener('click', () => {
+    const el = {
+      id: uid(),
+      type: 'row',
+      name: 'row',
+      x: 100, y: 120,
+      w: 1118, h: 79,   // matches your SVG
+      r: 0,
+      z: nextZ(),
+      text: 'Label',
+      rightText: 'Value',
+      rightW: 229       // matches your SVG right block width
+    };
+    elements.push(el);
+    createElDOM(el);
+    selectEl(el.id);
+    renderList();
+  });
+
+    document.getElementById('addTableBtn').addEventListener('click', () => {
+      const el = {
+        id: uid(),
+        type: 'table',
+        name: 'table',
+        x: 100, y: 200,
+        w: 1000, h: 480,
+        r: 0,
+        z: nextZ(),
+        tableData: [
+          { label: 'North Wyke, Devon', value: '40' },
+          { label: 'Cardinham, Cornwall', value: '40' },
+          { label: 'Astwood Bank, Worcester', value: '40' },
+          { label: 'Liscombe, Somerset', value: '37' },
+          { label: 'Camborne, Cornwall', value: '37' },
+          { label: 'Wiggonholt, West Sussex', value: '35' }
+        ],
+        tableRightW: 150
+      };
+      elements.push(el);
+      createElDOM(el);
+      selectEl(el.id);
+      renderList();
+    });
+
+    document.getElementById('addPinBtn').addEventListener('click', () => {
+      const el = {
+        id: uid(),
+        type: 'pin',
+        name: 'pin',
+        x: 220, y: 220,
+        w: 220, h: 54,
+        r: 0,
+        z: nextZ(),
+        text: 'Point'
+      };
+      elements.push(el);
+      createElDOM(el);
+      selectEl(el.id);
+      renderList();
+    });
+
+    document.getElementById('addImageBtn').addEventListener('click', () => {
+      document.getElementById('imgFile').click();
+    });
+
+    document.getElementById('addSlideTitleBtn').addEventListener('click', () => {
+      const el = {
+        id: uid(),
+        type: 'slideTitle',
+        name: 'slide-title',
+        x: 0, y: 78,
+        w: 1920, h: 76,
+        r: 0,
+        z: nextZ(),
+        text: 'Slide Title',
+        uppercase: true
+      };
+      elements.push(el);
+      createElDOM(el);
+      selectEl(el.id);
+      renderList();
+    });
+
+    document.getElementById('addSlideSubtitleBtn').addEventListener('click', () => {
+      const el = {
+        id: uid(),
+        type: 'slideSubtitle',
+        name: 'slide-subtitle',
+        x: 96, y: 159,
+        w: 1824, h: 54,
+        r: 0,
+        z: nextZ(),
+        text: 'Slide Subtitle',
+        uppercase: true
+      };
+      elements.push(el);
+      createElDOM(el);
+      selectEl(el.id);
+      renderList();
+    });
+
+    document.getElementById('imgFile').addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      const el = {
+        id: uid(),
+        type: 'image',
+        name: 'image',
+        x: 300, y: 300,
+        w: 320, h: 220,
+        r: 0,
+        z: nextZ(),
+        src: url
+      };
+      elements.push(el);
+      createElDOM(el);
+      selectEl(el.id);
+      renderList();
+      e.target.value = '';
+    });
+
+    function nextZ() {
+      return (elements.reduce((m,e) => Math.max(m, e.z), 0) || 0) + 1;
+    }
+
+    // --- Apply properties ---
+    document.getElementById('applyPropsBtn').addEventListener('click', () => {
+      const el = getSelected();
+      if (!el) return;
+
+      el.name = document.getElementById('propName').value.trim();
+      el.text = document.getElementById('propText').value;
+      el.rightText = document.getElementById('propRightText').value;
+      el.rightW = Number(document.getElementById('propRightW').value || 229);
+      el.tableRightW = Number(document.getElementById('propTableRightW').value || 100);
+      el.uppercase = document.getElementById('propUppercase').checked;
+
+      // Parse table data
+      const tableDataText = document.getElementById('propTableData').value.trim();
+      if (tableDataText) {
+        try {
+          el.tableData = JSON.parse(tableDataText);
+        } catch (e) {
+          alert('Invalid table data JSON: ' + e.message);
+          return;
+        }
+      }
+
+      el.x = Number(document.getElementById('propX').value || 0);
+      el.y = Number(document.getElementById('propY').value || 0);
+      el.w = Number(document.getElementById('propW').value || 10);
+      el.h = Number(document.getElementById('propH').value || 10);
+      el.r = Number(document.getElementById('propR').value || 0);
+      el.z = Number(document.getElementById('propZ').value || 0);
+
+      el.x = clamp(Math.round(el.x), 0, STAGE_W - 1);
+      el.y = clamp(Math.round(el.y), 0, STAGE_H - 1);
+      el.w = clamp(Math.round(el.w), 1, STAGE_W);
+      el.h = clamp(Math.round(el.h), 1, STAGE_H);
+
+      applyElStyle(el);
+      selectEl(el.id);
+      renderList();
+    });
+
+    // --- Delete ---
+    document.getElementById('deleteBtn').addEventListener('click', () => {
+      const el = getSelected();
+      if (!el) return;
+      stopAnimation(el.id);
+      const node = stage.querySelector(`.el[data-id="${el.id}"]`);
+      if (node) node.remove();
+      elements = elements.filter(e => e.id !== el.id);
+      selectedId = null;
+      stage.querySelectorAll('.el').forEach(n => n.classList.remove('selected'));
+      renderList();
+    });
+
+    function getSelected() {
+      if (!selectedId) return null;
+      return elements.find(e => e.id === selectedId) ?? null;
+    }
+
+    // --- Keyboard nudging ---
+    window.addEventListener('keydown', (e) => {
+      const el = getSelected();
+      if (!el) return;
+
+      const step = e.shiftKey ? 10 : 1;
+      let moved = false;
+
+      if (e.key === 'ArrowLeft') { el.x = clamp(el.x - step, 0, STAGE_W - 1); moved = true; }
+      if (e.key === 'ArrowRight') { el.x = clamp(el.x + step, 0, STAGE_W - 1); moved = true; }
+      if (e.key === 'ArrowUp') { el.y = clamp(el.y - step, 0, STAGE_H - 1); moved = true; }
+      if (e.key === 'ArrowDown') { el.y = clamp(el.y + step, 0, STAGE_H - 1); moved = true; }
+
+      if (moved) {
+        e.preventDefault();
+        applyElStyle(el);
+        document.getElementById('propX').value = el.x;
+        document.getElementById('propY').value = el.y;
+        renderList();
+      }
+    });
+
+    // --- Animations (Web Animations API) ---
+    const runningAnims = new Map(); // id -> Animation
+    let editAnimMode = false;
+    let editAnimEl = null;
+
+    function stopAnimation(id) {
+      const a = runningAnims.get(id);
+      if (a) {
+        a.cancel();
+        runningAnims.delete(id);
+      }
+      // Also stop all row animations for this table
+      const keys = Array.from(runningAnims.keys());
+      keys.forEach(key => {
+        if (key.startsWith(id + '-row-')) {
+          const anim = runningAnims.get(key);
+          if (anim) anim.cancel();
+          runningAnims.delete(key);
+        }
+      });
+    }
+
+    function playPreset(el, preset, duration, delay, loop) {
+      const node = stage.querySelector(`.el[data-id="${el.id}"]`);
+      if (!node) return;
+
+      stopAnimation(el.id);
+
+      // Use custom animation if available and not "none"
+      if (el.customAnim && preset !== 'none') {
+        const keyframes = [
+          {
+            left: el.customAnim.startX + 'px',
+            top: el.customAnim.startY + 'px',
+            width: el.customAnim.startW + 'px',
+            height: el.customAnim.startH + 'px',
+            transform: `rotate(${el.customAnim.startR}deg)`
+          },
+          {
+            left: el.customAnim.endX + 'px',
+            top: el.customAnim.endY + 'px',
+            width: el.customAnim.endW + 'px',
+            height: el.customAnim.endH + 'px',
+            transform: `rotate(${el.customAnim.endR}deg)`
+          }
+        ];
+        
+        const opts = {
+          duration,
+          delay,
+          easing: 'cubic-bezier(.2,.8,.2,1)',
+          iterations: loop ? Infinity : 1,
+          fill: loop ? 'both' : 'forwards'
+        };
+        
+        const anim = node.animate(keyframes, opts);
+        runningAnims.set(el.id, anim);
+        return;
+      }
+
+      // If table, animate each row with staggered delay
+      if (el.type === 'table') {
+        const rows = node.querySelectorAll('.table-row');
+        const rowDelay = 100; // ms between rows
+        
+        rows.forEach((row, index) => {
+          const rowOpts = {
+            duration,
+            delay: delay + (index * rowDelay),
+            easing: 'cubic-bezier(.2,.8,.2,1)',
+            iterations: loop ? Infinity : 1,
+            fill: loop ? 'both' : 'forwards'
+          };
+
+          let keyframes = null;
+
+          switch (preset) {
+            case 'fadeIn':
+              keyframes = [
+                { opacity: 0, transform: `translateY(10px)` },
+                { opacity: 1, transform: `translateY(0px)` }
+              ];
+              break;
+            case 'pulse':
+              keyframes = [
+                { transform: `scale(1)` },
+                { transform: `scale(1.06)` },
+                { transform: `scale(1)` }
+              ];
+              rowOpts.easing = 'ease-in-out';
+              rowOpts.iterations = Infinity;
+              break;
+            case 'slideInLeft':
+              keyframes = [
+                { opacity: 0, transform: `translateX(-60px)` },
+                { opacity: 1, transform: `translateX(0px)` }
+              ];
+              break;
+            case 'slideInUp':
+              keyframes = [
+                { opacity: 0, transform: `translateY(60px)` },
+                { opacity: 1, transform: `translateY(0px)` }
+              ];
+              break;
+            case 'pop':
+              keyframes = [
+                { opacity: 0, transform: `scale(.85)` },
+                { opacity: 1, transform: `scale(1.04)` },
+                { opacity: 1, transform: `scale(1)` }
+              ];
+              break;
+            default:
+              return;
+          }
+
+          const anim = row.animate(keyframes, rowOpts);
+          runningAnims.set(el.id + '-row-' + index, anim);
+        });
+        return;
+      }
+
+      const opts = {
+        duration,
+        delay,
+        easing: 'cubic-bezier(.2,.8,.2,1)',
+        iterations: loop ? Infinity : 1,
+        fill: loop ? 'both' : 'forwards'
+      };
+
+      let keyframes = null;
+
+      switch (preset) {
+        case 'fadeIn':
+          keyframes = [
+            { opacity: 0, transform: `translateY(10px) rotate(${el.r}deg)` },
+            { opacity: 1, transform: `translateY(0px) rotate(${el.r}deg)` }
+          ];
+          break;
+        case 'pulse':
+          keyframes = [
+            { transform: `scale(1) rotate(${el.r}deg)` },
+            { transform: `scale(1.06) rotate(${el.r}deg)` },
+            { transform: `scale(1) rotate(${el.r}deg)` }
+          ];
+          opts.easing = 'ease-in-out';
+          opts.iterations = Infinity;
+          break;
+        case 'slideInLeft':
+          keyframes = [
+            { opacity: 0, transform: `translateX(-60px) rotate(${el.r}deg)` },
+            { opacity: 1, transform: `translateX(0px) rotate(${el.r}deg)` }
+          ];
+          break;
+        case 'slideInUp':
+          keyframes = [
+            { opacity: 0, transform: `translateY(60px) rotate(${el.r}deg)` },
+            { opacity: 1, transform: `translateY(0px) rotate(${el.r}deg)` }
+          ];
+          break;
+        case 'pop':
+          keyframes = [
+            { opacity: 0, transform: `scale(.85) rotate(${el.r}deg)` },
+            { opacity: 1, transform: `scale(1.04) rotate(${el.r}deg)` },
+            { opacity: 1, transform: `scale(1) rotate(${el.r}deg)` }
+          ];
+          break;
+        default:
+          return;
+      }
+
+      const anim = node.animate(keyframes, opts);
+      runningAnims.set(el.id, anim);
+    }
+
+    document.getElementById('playAnimBtn').addEventListener('click', () => {
+      // Play background animation if enabled
+      playBgAnimation();
+      
+      const el = getSelected();
+      if (!el) return;
+
+      const preset = document.getElementById('animPreset').value;
+      const duration = Number(document.getElementById('animDuration').value || 900);
+      const delay = Number(document.getElementById('animDelay').value || 0);
+      const loop = document.getElementById('animLoop').value === '1';
+
+      playPreset(el, preset, duration, delay, loop);
+    });
+
+    document.getElementById('stopAnimBtn').addEventListener('click', () => {
+      const el = getSelected();
+      if (!el) return;
+      stopAnimation(el.id);
+      // reset transform to just rotate (remove animation transforms)
+      const node = stage.querySelector(`.el[data-id="${el.id}"]`);
+      if (node) node.style.transform = `rotate(${el.r}deg)`;
+    });
+
+    document.getElementById('editAnimBtn').addEventListener('click', () => {
+      const el = getSelected();
+      if (!el) return;
+      
+      editAnimMode = true;
+      editAnimEl = el;
+      
+      // Initialize custom animation data if not exists
+      if (!el.customAnim) {
+        el.customAnim = {
+          startX: el.x,
+          startY: el.y,
+          startW: el.w,
+          startH: el.h,
+          startR: el.r,
+          endX: el.x,
+          endY: el.y,
+          endW: el.w,
+          endH: el.h,
+          endR: el.r
+        };
+      }
+      
+      document.getElementById('editAnimControls').style.display = 'block';
+      document.getElementById('editAnimBtn').textContent = 'Editing Animation...';
+      document.getElementById('editAnimBtn').disabled = true;
+      
+      // Highlight the element
+      const node = stage.querySelector(`.el[data-id="${el.id}"]`);
+      if (node) {
+        node.style.boxShadow = '0 0 0 3px rgba(255,107,107,.8)';
+      }
+    });
+
+    document.getElementById('setStartBtn').addEventListener('click', () => {
+      if (!editAnimEl) return;
+      
+      editAnimEl.customAnim.startX = editAnimEl.x;
+      editAnimEl.customAnim.startY = editAnimEl.y;
+      editAnimEl.customAnim.startW = editAnimEl.w;
+      editAnimEl.customAnim.startH = editAnimEl.h;
+      editAnimEl.customAnim.startR = editAnimEl.r;
+      
+      alert('Start position set!');
+    });
+
+    document.getElementById('setEndBtn').addEventListener('click', () => {
+      if (!editAnimEl) return;
+      
+      editAnimEl.customAnim.endX = editAnimEl.x;
+      editAnimEl.customAnim.endY = editAnimEl.y;
+      editAnimEl.customAnim.endW = editAnimEl.w;
+      editAnimEl.customAnim.endH = editAnimEl.h;
+      editAnimEl.customAnim.endR = editAnimEl.r;
+      
+      alert('End position set!');
+    });
+
+    document.getElementById('exitAnimBtn').addEventListener('click', () => {
+      if (!editAnimEl) return;
+      
+      // Keep element at end position
+      editAnimEl.x = editAnimEl.customAnim.endX;
+      editAnimEl.y = editAnimEl.customAnim.endY;
+      editAnimEl.w = editAnimEl.customAnim.endW;
+      editAnimEl.h = editAnimEl.customAnim.endH;
+      editAnimEl.r = editAnimEl.customAnim.endR;
+      
+      // Update visuals
+      applyElStyle(editAnimEl);
+      updatePropsForm();
+      
+      // Exit edit mode
+      editAnimMode = false;
+      const node = stage.querySelector(`.el[data-id="${editAnimEl.id}"]`);
+      if (node) {
+        node.style.boxShadow = '';
+      }
+      editAnimEl = null;
+      
+      document.getElementById('editAnimControls').style.display = 'none';
+      document.getElementById('editAnimBtn').textContent = 'Edit Animation Mode';
+      document.getElementById('editAnimBtn').disabled = false;
+    });
+
+    // --- Export / Import ---
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const payload = {
+        version: 1,
+        stage: { w: STAGE_W, h: STAGE_H },
+        background: stage.style.backgroundImage || '',
+        elements: elements
+      };
+      document.getElementById('jsonBox').value = JSON.stringify(payload, null, 2);
+    });
+
+    document.getElementById('exportPresentBtn').addEventListener('click', () => {
+      const payload = {
+        version: 1,
+        stage: { w: STAGE_W, h: STAGE_H },
+        background: stage.style.backgroundImage || '',
+        bgAnimation: bgAnimData,
+        elements: elements
+      };
+      generatePresentationHTML(payload);
+    });
+
+    function generatePresentationHTML(payload) {
+      const bgImage = payload.background;
+      const bgStyle = bgImage ? 'background-image: ' + bgImage + ';' : '';
+
+      const htmlContent = '<!doctype html>\n' +
+'<html lang="en">\n' +
+'<head>\n' +
+'  <meta charset="utf-8" />\n' +
+'  <meta name="viewport" content="width=device-width, initial-scale=1" />\n' +
+'  <title>Presentation</title>\n' +
+'  <link rel="preconnect" href="https://fonts.googleapis.com">\n' +
+'  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n' +
+'  <link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;700&display=swap" rel="stylesheet">\n' +
+'  <style>\n' +
+'    * { box-sizing: border-box; }\n' +
+'    body {\n' +
+'      margin: 0;\n' +
+'      padding: 0;\n' +
+'      background: #000;\n' +
+'      overflow: hidden;\n' +
+'      font-family: "Hind", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;\n' +
+'      width: 100vw;\n' +
+'      height: 100vh;\n' +
+'      position: relative;\n' +
+'    }\n' +
+'    .stage {\n' +
+'      position: absolute;\n' +
+'      top: 50%;\n' +
+'      left: 50%;\n' +
+'      transform-origin: center center;\n' +
+'      width: ' + payload.stage.w + 'px;\n' +
+'      height: ' + payload.stage.h + 'px;\n' +
+'      background-size: cover;\n' +
+'      background-repeat: no-repeat;\n' +
+'      background-position: center;\n' +
+'      ' + bgStyle + '\n' +
+'    }\n' +
+'    .el { position: absolute; transform-origin: center; }\n' +
+'    .el.text {\n' +
+'      padding: 10px 12px;\n' +
+'      border-radius: 10px;\n' +
+'      background: rgba(0,0,0,.35);\n' +
+'      backdrop-filter: blur(6px);\n' +
+'      color: white;\n' +
+'      font-weight: 600;\n' +
+'      letter-spacing: .2px;\n' +
+'      min-width: 120px;\n' +
+'      min-height: 44px;\n' +
+'      display: inline-flex;\n' +
+'      align-items: center;\n' +
+'      justify-content: center;\n' +
+'      text-shadow: 0 1px 10px rgba(0,0,0,.7);\n' +
+'    }\n' +
+'    .el.image {\n' +
+'      border-radius: 12px;\n' +
+'      overflow: hidden;\n' +
+'      background: rgba(255,255,255,.08);\n' +
+'      box-shadow: 0 12px 30px rgba(0,0,0,.25);\n' +
+'    }\n' +
+'    .el.image img {\n' +
+'      width: 100%;\n' +
+'      height: 100%;\n' +
+'      object-fit: contain;\n' +
+'      display: block;\n' +
+'    }\n' +
+'    .el.row {\n' +
+'      display: grid;\n' +
+'      grid-template-columns: 1fr var(--row-right-w, 229px);\n' +
+'      overflow: hidden;\n' +
+'      box-shadow: 0 12px 30px rgba(0,0,0,.18);\n' +
+'    }\n' +
+'    .el.row .cell-left,\n' +
+'    .el.row .cell-right {\n' +
+'      display: flex;\n' +
+'      align-items: center;\n' +
+'      padding: 0 18px;\n' +
+'      font-family: "Hind", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;\n' +
+'      font-size: 32px;\n' +
+'      line-height: 1;\n' +
+'    }\n' +
+'    .el.row .cell-left {\n' +
+'      color: #000;\n' +
+'      background: linear-gradient(90deg, rgba(255,255,255,.9) 0%, rgba(204,204,204,.9) 100%);\n' +
+'      font-weight: 400;\n' +
+'    }\n' +
+'    .el.row .cell-right {\n' +
+'      color: #fff;\n' +
+'      font-weight: 700;\n' +
+'      background: linear-gradient(135deg, #243048 0%, #5774AE 100%);\n' +
+'      justify-content: center;\n' +
+'      text-shadow: 0 1px 10px rgba(0,0,0,.35);\n' +
+'    }\n' +
+'    .el.table {\n' +
+'      display: flex;\n' +
+'      flex-direction: column;\n' +
+'      gap: 10px;\n' +
+'      overflow: visible;\n' +
+'      background: transparent;\n' +
+'    }\n' +
+'    .el.table .table-row {\n' +
+'      display: grid;\n' +
+'      grid-template-columns: auto var(--table-right-w, 300px);\n' +
+'      min-height: 80px;\n' +
+'      gap: 10px;\n' +
+'    }\n' +
+'    .el.table .table-cell-left,\n' +
+'    .el.table .table-cell-right {\n' +
+'      display: flex;\n' +
+'      align-items: center;\n' +
+'      padding: 32px 40px 28px;\n' +
+'      font-size: 48px;\n' +
+'      font-family: "Hind", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;\n' +
+'      line-height: 1;\n' +
+'      overflow: hidden;\n' +
+'      text-overflow: ellipsis;\n' +
+'      white-space: nowrap;\n' +
+'      border-radius: 4px;\n' +
+'    }\n' +
+'    .el.table .table-cell-left {\n' +
+'      color: #000;\n' +
+'      background: linear-gradient(90deg, rgba(255,255,255,.9) 0%, rgba(204,204,204,.9) 100%);\n' +
+'      font-weight: 500;\n' +
+'      padding-right: 80px;\n' +
+'    }\n' +
+'    .el.table .table-cell-right {\n' +
+'      color: #fff;\n' +
+'      background: linear-gradient(135deg, #243048 0%, #5774AE 100%);\n' +
+'      font-weight: 600;\n' +
+'      justify-content: center;\n' +
+'      text-shadow: 0 1px 10px rgba(0,0,0,.35);\n' +
+'    }\n' +
+'  </style>\n' +
+'</head>\n' +
+'<body>\n' +
+'  <div id="stage" class="stage">\n' +
+'  </div>\n' +
+'\n' +
+'  <script>\n' +
+'    const STAGE_W = ' + payload.stage.w + ';\n' +
+'    const STAGE_H = ' + payload.stage.h + ';\n' +
+'    const stage = document.getElementById(\'stage\');\n' +
+'    const elements = ' + JSON.stringify(payload.elements, null, 2) + ';\n' +
+'\n' +
+'    function scaleStage() {\n' +
+'      const sw = window.innerWidth / STAGE_W;\n' +
+'      const sh = window.innerHeight / STAGE_H;\n' +
+'      const s = Math.min(sw, sh);\n' +
+'      stage.style.transform = \'translate(-50%, -50%) scale(\' + s + \')\';\n' +
+'      stage.style.width = STAGE_W + \'px\';\n' +
+'      stage.style.height = STAGE_H + \'px\';\n' +
+'    }\n' +
+'\n' +
+'    function createElements() {\n' +
+'      elements.forEach(el => {\n' +
+'        const node = document.createElement(\'div\');\n' +
+'        node.className = \'el \' + el.type;\n' +
+'        node.dataset.id = el.id;\n' +
+'        node.style.left = el.x + \'px\';\n' +
+'        node.style.top = el.y + \'px\';\n' +
+'        node.style.width = el.w + \'px\';\n' +
+'        node.style.height = el.h + \'px\';\n' +
+'        node.style.transform = \'rotate(\' + el.r + \'deg)\';\n' +
+'        node.style.zIndex = String(el.z);\n' +
+'\n' +
+'        if (el.type === \'text\') {\n' +
+'          node.classList.add(\'text\');\n' +
+'          node.textContent = el.text || \'Text\';\n' +
+'        } else if (el.type === \'pin\') {\n' +
+'          node.classList.add(\'text\');\n' +
+'          node.style.paddingLeft = \'34px\';\n' +
+'          node.style.backgroundImage = \'radial-gradient(circle at 18px 50%, rgba(255,255,255,.95) 0 4px, rgba(122,167,255,.85) 5px 9px, transparent 10px)\';\n' +
+'          node.style.backgroundRepeat = \'no-repeat\';\n' +
+'          node.style.backgroundSize = \'34px 34px\';\n' +
+'          node.textContent = el.text || \'Pin\';\n' +
+'        } else if (el.type === \'image\') {\n' +
+'          const img = document.createElement(\'img\');\n' +
+'          img.src = el.src || \'\';\n' +
+'          node.appendChild(img);\n' +
+'        } else if (el.type === \'row\') {\n' +
+'          const left = document.createElement(\'div\');\n' +
+'          left.className = \'cell-left\';\n' +
+'          left.textContent = el.text || \'Left\';\n' +
+'          const right = document.createElement(\'div\');\n' +
+'          right.className = \'cell-right\';\n' +
+'          right.textContent = el.rightText || \'Right\';\n' +
+'          node.appendChild(left);\n' +
+'          node.appendChild(right);\n' +
+'          node.style.setProperty(\'--row-right-w\', (el.rightW || 229) + \'px\');\n' +
+'        } else if (el.type === \'table\') {\n' +
+'          node.style.setProperty(\'--table-right-w\', (el.tableRightW || 200) + \'px\');\n' +
+'          const rows = el.tableData || [];\n' +
+'          rows.forEach(row => {\n' +
+'            const rowDiv = document.createElement(\'div\');\n' +
+'            rowDiv.className = \'table-row\';\n' +
+'            const leftCell = document.createElement(\'div\');\n' +
+'            leftCell.className = \'table-cell-left\';\n' +
+'            leftCell.textContent = row.label || \'\';\n' +
+'            const rightCell = document.createElement(\'div\');\n' +
+'            rightCell.className = \'table-cell-right\';\n' +
+'            rightCell.textContent = row.value || \'\';\n' +
+'            rowDiv.appendChild(leftCell);\n' +
+'            rowDiv.appendChild(rightCell);\n' +
+'            node.appendChild(rowDiv);\n' +
+'          });\n' +
+'        }\n' +
+'\n' +
+'        stage.appendChild(node);\n' +
+'      });\n' +
+'    }\n' +
+'\n' +
+'    window.addEventListener(\'resize\', scaleStage);\n' +
+'    scaleStage();\n' +
+'    createElements();\n' +
+'\n' +
+'    // Background animation\n' +
+'    const bgAnimData = ' + JSON.stringify(payload.bgAnimation) + ';\n' +
+'    if (bgAnimData.enabled) {\n' +
+'      stage.style.backgroundSize = bgAnimData.startScale * 100 + \'% \' + bgAnimData.startScale * 100 + \'%\';\n' +
+'      stage.style.backgroundPosition = bgAnimData.startX + \'% \' + bgAnimData.startY + \'%\';\n' +
+'      \n' +
+'      stage.animate([\n' +
+'        {\n' +
+'          backgroundSize: bgAnimData.startScale * 100 + \'% \' + bgAnimData.startScale * 100 + \'%\',\n' +
+'          backgroundPosition: bgAnimData.startX + \'% \' + bgAnimData.startY + \'%\'\n' +
+'        },\n' +
+'        {\n' +
+'          backgroundSize: bgAnimData.endScale * 100 + \'% \' + bgAnimData.endScale * 100 + \'%\',\n' +
+'          backgroundPosition: bgAnimData.endX + \'% \' + bgAnimData.endY + \'%\'\n' +
+'        }\n' +
+'      ], {\n' +
+'        duration: bgAnimData.duration,\n' +
+'        easing: bgAnimData.easing,\n' +
+'        fill: \'forwards\'\n' +
+'      });\n' +
+'    }\n' +
+'\n' +
+'    // Animate table rows on load\n' +
+'    elements.forEach(el => {\n' +
+'      const node = stage.querySelector(\'.el[data-id="\' + el.id + \'"]\');\n' +
+'      if (!node || el.type !== \'table\') return;\n' +
+'      const rows = node.querySelectorAll(\'.table-row\');\n' +
+'      rows.forEach((row, idx) => {\n' +
+'        row.animate([\n' +
+'          { opacity: 0, transform: \'translateY(60px)\' },\n' +
+'          { opacity: 1, transform: \'translateY(0px)\' }\n' +
+'        ], {\n' +
+'          duration: 900,\n' +
+'          delay: idx * 100,\n' +
+'          easing: \'cubic-bezier(.2,.8,.2,1)\',\n' +
+'          fill: \'both\'\n' +
+'        });\n' +
+'      });\n' +
+'    });\n' +
+'  <\/script>\n' +
+'</body>\n' +
+'</html>';
+
+      // Download the HTML file
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'presentation-' + Date.now() + '.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      alert('Presentation HTML downloaded! Open the file to view the presentation.');
+    }
+
+    document.getElementById('importBtn').addEventListener('click', () => {
+      const text = document.getElementById('jsonBox').value.trim();
+      if (!text) return;
+
+      let payload;
+      try { payload = JSON.parse(text); }
+      catch { alert('Invalid JSON'); return; }
+
+      // Clear current
+      runningAnims.forEach(a => a.cancel());
+      runningAnims.clear();
+      stage.querySelectorAll('.el').forEach(n => n.remove());
+      elements = [];
+
+      if (payload.background) stage.style.backgroundImage = payload.background;
+
+      if (Array.isArray(payload.elements)) {
+        for (const el of payload.elements) {
+          // basic validation
+          if (!el?.id || !el?.type) continue;
+          elements.push(el);
+          createElDOM(el);
+        }
+      }
+      selectedId = null;
+      renderList();
+    });
+
+    // --- Initial demo content ---
+    (function seed() {
+      const a = {
+        id: uid(), type: 'text', name: 'title',
+        x: 90, y: 80, w: 440, h: 70, r: 0, z: 1,
+        text: 'Map Overlay'
+      };
+      const b = {
+        id: uid(), type: 'pin', name: 'pin-1',
+        x: 220, y: 260, w: 260, h: 56, r: 0, z: 2,
+        text: 'Ljubljana'
+      };
+      elements.push(a,b);
+      createElDOM(a);
+      createElDOM(b);
+      renderList();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Presentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      overflow: hidden;
+      font-family: "Hind", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    .stage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: center center;
+      width: 1920px;
+      height: 1080px;
+    }
+    #bg-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+    .el { position: absolute; transform-origin: center; }
+    .el.text {
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(0,0,0,.35);
+      backdrop-filter: blur(6px);
+      color: white;
+      font-weight: 600;
+      letter-spacing: .2px;
+      min-width: 120px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 0 1px 10px rgba(0,0,0,.7);
+    }
+    .el.image {
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(255,255,255,.08);
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+    .el.image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .el.row {
+      display: grid;
+      grid-template-columns: 1fr var(--row-right-w, 229px);
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0,0,0,.18);
+    }
+    .el.row .cell-left,
+    .el.row .cell-right {
+      display: flex;
+      align-items: center;
+      padding: 0 18px;
+      font-family: "Hind", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      font-size: 32px;
+      line-height: 1;
+    }
+    .el.row .cell-left {
+      color: #000;
+      background: linear-gradient(90deg, rgba(255,255,255,.9) 0%, rgba(204,204,204,.9) 100%);
+      font-weight: 400;
+    }
+    .el.row .cell-right {
+      color: #fff;
+      font-weight: 700;
+      background: linear-gradient(135deg, #243048 0%, #5774AE 100%);
+      justify-content: center;
+      text-shadow: 0 1px 10px rgba(0,0,0,.35);
+    }
+    .el.table {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow: visible;
+      background: transparent;
+    }
+    .el.table .table-row {
+      display: grid;
+      grid-template-columns: auto var(--table-right-w, 300px);
+      min-height: 80px;
+      gap: 10px;
+    }
+    .el.table .table-cell-left,
+    .el.table .table-cell-right {
+      display: flex;
+      align-items: center;
+      padding: 32px 40px 28px;
+      font-size: 48px;
+      font-family: "Hind", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      line-height: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      border-radius: 4px;
+    }
+    .el.table .table-cell-left {
+      color: #000;
+      background: linear-gradient(90deg, rgba(255,255,255,.9) 0%, rgba(204,204,204,.9) 100%);
+      font-weight: 500;
+      padding-right: 80px;
+    }
+    .el.table .table-cell-right {
+      color: #fff;
+      background: linear-gradient(135deg, #243048 0%, #5774AE 100%);
+      font-weight: 600;
+      justify-content: center;
+      text-shadow: 0 1px 10px rgba(0,0,0,.35);
+    }
+  </style>
+</head>
+<body>
+  <div id="stage" class="stage">
+    <video id="bg-video" autoplay muted playsinline>
+      <source src="uk-rain.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <script>
+    const STAGE_W = 1920;
+    const STAGE_H = 1080;
+    const stage = document.getElementById('stage');
+    const elements = [
+  {
+    "id": "0f16asf",
+    "type": "table",
+    "name": "table",
+    "x": 780,
+    "y": 275,
+    "w": 850,
+    "h": 480,
+    "r": 0,
+    "z": 3,
+    "tableData": [
+      {
+        "label": "North Wyke, Devon",
+        "value": "40"
+      },
+      {
+        "label": "Cardinham, Cornwall",
+        "value": "40"
+      },
+      {
+        "label": "Astwood Bank, Worcester",
+        "value": "40"
+      },
+      {
+        "label": "Liscombe, Somerset",
+        "value": "37"
+      },
+      {
+        "label": "Camborne, Cornwall",
+        "value": "37"
+      },
+      {
+        "label": "Wiggonholt, West Sussex",
+        "value": "35"
+      }
+    ],
+    "tableRightW": 150
+  }
+];
+
+    function scaleStage() {
+      const sw = window.innerWidth / STAGE_W;
+      const sh = window.innerHeight / STAGE_H;
+      const s = Math.min(sw, sh);
+      stage.style.transform = 'translate(-50%, -50%) scale(' + s + ')';
+      stage.style.width = STAGE_W + 'px';
+      stage.style.height = STAGE_H + 'px';
+    }
+
+    function createElements() {
+      elements.forEach(el => {
+        const node = document.createElement('div');
+        node.className = 'el ' + el.type;
+        node.dataset.id = el.id;
+        node.style.left = el.x + 'px';
+        node.style.top = el.y + 'px';
+        node.style.width = el.w + 'px';
+        node.style.height = el.h + 'px';
+        node.style.transform = 'rotate(' + el.r + 'deg)';
+        node.style.zIndex = String(el.z);
+
+        if (el.type === 'text') {
+          node.classList.add('text');
+          node.textContent = el.text || 'Text';
+        } else if (el.type === 'pin') {
+          node.classList.add('text');
+          node.style.paddingLeft = '34px';
+          node.style.backgroundImage = 'radial-gradient(circle at 18px 50%, rgba(255,255,255,.95) 0 4px, rgba(122,167,255,.85) 5px 9px, transparent 10px)';
+          node.style.backgroundRepeat = 'no-repeat';
+          node.style.backgroundSize = '34px 34px';
+          node.textContent = el.text || 'Pin';
+        } else if (el.type === 'image') {
+          const img = document.createElement('img');
+          img.src = el.src || '';
+          node.appendChild(img);
+        } else if (el.type === 'row') {
+          const left = document.createElement('div');
+          left.className = 'cell-left';
+          left.textContent = el.text || 'Left';
+          const right = document.createElement('div');
+          right.className = 'cell-right';
+          right.textContent = el.rightText || 'Right';
+          node.appendChild(left);
+          node.appendChild(right);
+          node.style.setProperty('--row-right-w', (el.rightW || 229) + 'px');
+        } else if (el.type === 'table') {
+          node.style.setProperty('--table-right-w', (el.tableRightW || 200) + 'px');
+          const rows = el.tableData || [];
+          rows.forEach(row => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'table-row';
+            const leftCell = document.createElement('div');
+            leftCell.className = 'table-cell-left';
+            leftCell.textContent = row.label || '';
+            const rightCell = document.createElement('div');
+            rightCell.className = 'table-cell-right';
+            rightCell.textContent = row.value || '';
+            rowDiv.appendChild(leftCell);
+            rowDiv.appendChild(rightCell);
+            node.appendChild(rowDiv);
+          });
+        }
+
+        stage.appendChild(node);
+      });
+    }
+
+    window.addEventListener('resize', scaleStage);
+    scaleStage();
+    createElements();
+
+    // Play video when loaded
+    const video = document.getElementById('bg-video');
+    video.addEventListener('loadeddata', () => {
+      video.play().catch(() => {
+        // If autoplay fails, play on first user interaction
+        const playOnInteraction = () => {
+          video.play();
+          document.removeEventListener('touchstart', playOnInteraction);
+          document.removeEventListener('click', playOnInteraction);
+        };
+        document.addEventListener('touchstart', playOnInteraction);
+        document.addEventListener('click', playOnInteraction);
+      });
+    });
+
+    // Animate table rows on load
+    elements.forEach(el => {
+      const node = stage.querySelector('.el[data-id="' + el.id + '"]');
+      if (!node || el.type !== 'table') return;
+      const rows = node.querySelectorAll('.table-row');
+      rows.forEach((row, idx) => {
+        row.animate([
+          { opacity: 0, transform: 'translateY(60px)' },
+          { opacity: 1, transform: 'translateY(0px)' }
+        ], {
+          duration: 900,
+          delay: idx * 100 + 1500,
+          easing: 'cubic-bezier(.2,.8,.2,1)',
+          fill: 'both'
+        });
+      });
+    });
+  </script>
+</body>
+</html>
